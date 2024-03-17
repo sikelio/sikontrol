@@ -29,7 +29,7 @@ export default class credits_controller extends Controller {
             libLink.href = `${this.npmBaseLink}${dependency}`;
             libLink.target = '_blank';
             libLink.classList.add('hover:text-gray-500', 'hover:underline');
-            libLink.textContent = `- ${dependency} - ${pkg.dependencies[dependency].replace('^', 'v')}`;;
+            libLink.textContent = `- ${dependency} - ${this.formatNpmPackageVersion(pkg.dependencies[dependency])}`;;
 
             const libItem: HTMLLIElement = document.createElement('li');
             libItem.appendChild(libLink);
@@ -42,7 +42,7 @@ export default class credits_controller extends Controller {
             libLink.href = `${this.npmBaseLink}${devDependency}`;
             libLink.target = '_blank';
             libLink.classList.add('hover:text-gray-500', 'hover:underline');
-            libLink.textContent = `- ${devDependency} - ${pkg.devDependencies[devDependency].replace('^', 'v')}`;;
+            libLink.textContent = `- ${devDependency} - ${this.formatNpmPackageVersion(pkg.devDependencies[devDependency])}`;;
 
             const libItem: HTMLLIElement = document.createElement('li');
             libItem.appendChild(libLink);
@@ -76,5 +76,21 @@ export default class credits_controller extends Controller {
         }
 
         return 'undefined';
+    }
+
+    private formatNpmPackageVersion(value: string): string {
+        const regex: RegExp = /https:\/\/github\.com\/[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_]+(#\S+)?$/;
+
+        if (regex.test(value) === true) {
+            const version = value.match(regex);
+
+            if (version === null) {
+                return 'undefined';
+            }
+
+            return version[1].replace('#', '');
+        }
+
+        return value.replace('^', 'v');
     }
 }
