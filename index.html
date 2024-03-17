@@ -28,13 +28,49 @@
         </div>
       </div>
 
-      <div class="flex-grow bg-app-light-gray p-[45px] overflow-y-scroll">
+      <div class="flex-grow bg-app-light-gray p-[45px] overflow-y-auto">
         <div data-main-target="page" class="w-full h-full">
           <span>App Page</span>
         </div>
 
-        <div data-main-target="page" class="w-full h-full hidden">
-          <span>Credits Page</span>
+        <div data-main-target="page" data-controller="credits" class="w-full h-full hidden">
+          <span class="text-[24px] text-white font-bold">Credits</span>
+
+          <br><br>
+
+          <div class="flex">
+            <div class="flex-1">
+              <span class="text-[24px] text-white font-bold flex justify-center">NPM</span>
+
+              <br><br>
+
+              <span class="text-[20px] text-white font-bold flex justify-center">Dependencies</span>
+
+              <br>
+
+              <ul class="text-[16px] text-white" data-credits-target="npmlibs"></ul>
+
+              <br>
+
+              <span class="text-[20px] text-white font-bold flex justify-center">Dev Dependencies</span>
+
+              <br>
+
+              <ul class="text-[16px] text-white" data-credits-target="npmdevlibs"></ul>
+            </div>
+  
+            <div class="flex-1">
+              <span class="text-[24px] text-white font-bold flex justify-center">Cargo</span>
+
+              <br><br>
+
+              <span class="text-[20px] text-white font-bold flex justify-center">Dependencies</span>
+
+              <br>
+
+              <ul class="text-[16px] text-white" data-credits-target="cargolibs"></ul>
+            </div>
+          </div>
         </div>
 
         <div data-main-target="page" data-controller="settings" class="w-full h-full hidden">
@@ -62,7 +98,7 @@
             </div>
           </form>
 
-          <div class="w-full mt-[50px] mb-[30px]">
+          <div class="w-full mt-[40px] mb-[30px]">
             <hr class="border-t-2 border-white">
           </div>
 
@@ -71,21 +107,49 @@
             <input type="checkbox" class="checkbox" data-action="input->settings#toggleAutostart" />
           </label>
 
-          <div class="w-full mt-[30px] mb-[50px]">
+          <div class="w-full mt-[30px] mb-[30px]">
             <hr class="border-t-2 border-white">
           </div>
 
           <div class="pb-[45px]">
             <p class="text-[24px] text-white">
-              <span class="font-bold">About</span> <br><br>
+              <span class="font-bold mb-5">About</span>
 
-              Sikontrol 1.0.0 <br>
-              Licence GPLv3 <br><br>
+              <br>
 
-              Author: <a href="https://github.com/sikelio" target="_blank">Sikelio</a> <br><br>
-
-              Website: <a href="https://github.com/sikelio/sikontrol" target="_blank">https://github.com/sikelio/sikontrol</a> <br>
-              Support url: <a href="https://github.com/sikelio/sikontrol/issues" target="_blank">https://github.com/sikelio/sikontrol/issues</a>
+              <div class="mt-5">
+                <div class="text-white">
+                  <span class="text-[16px]">
+                    Sikontrol <span data-settings-target="version"></span>
+                  </span>
+    
+                  <br>
+    
+                  <span class="text-[16px]">
+                    Licence: GPLv3
+                  </span>
+                </div>
+  
+                <br>
+  
+                <div class="text-white">
+                  <span class="text-[16px]">
+                    Author: <a href="https://github.com/sikelio" class="hover:text-gray-500 hover:underline" target="_blank">Sikelio</a>
+                  </span>
+    
+                  <br>
+    
+                  <span class="text-[16px]">
+                    Website: <a href="https://github.com/sikelio/sikontrol" class="hover:text-gray-500 hover:underline" target="_blank">https://github.com/sikelio/sikontrol</a>
+                  </span>
+    
+                  <br>
+    
+                  <span class="text-[16px]">
+                    Support: <a href="https://github.com/sikelio/sikontrol/issues" class="hover:text-gray-500 hover:underline" target="_blank">https://github.com/sikelio/sikontrol/issues</a>
+                  </span>
+                </div>
+              </div>
             </p>
           </div>
         </div>

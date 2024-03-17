@@ -1,10 +1,20 @@
 import { Controller } from '@hotwired/stimulus';
+import { invoke } from '@tauri-apps/api';
+
+import type { IPackageJson } from '../interfaces/IPackageJson';
 
 export default class settings_controller extends Controller {
-    public static targets: string[] = ['port', 'token'];
+    public static targets: string[] = ['port', 'token', 'version'];
 
     declare readonly portTarget: HTMLInputElement;
     declare readonly tokenTarget: HTMLInputElement;
+    declare readonly versionTarget: HTMLSpanElement;
+
+    public async connect() {
+        const packageJson: string = await invoke('get_package_json');
+
+        this.setPackageInfos(JSON.parse(packageJson));
+    }
 
     public saveSettings(e: SubmitEvent) {
         e.preventDefault();
@@ -57,5 +67,9 @@ export default class settings_controller extends Controller {
         const checkbox: HTMLInputElement = e.currentTarget as HTMLInputElement;
 
         return; // TODO: IPC Request
+    }
+
+    private setPackageInfos(pkg: IPackageJson) {
+        this.versionTarget.textContent = pkg.version
     }
 }
