@@ -5,7 +5,15 @@ export default {
     './src/**/*.{js,ts}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'montserrat': ['Montserrat', 'sans-serif'],
+      },
+      colors: {
+        'app-light-gray': '#363636',
+        'app-dark-gray': '#222222'
+      }
+    },
   },
   plugins: [
     require('daisyui')

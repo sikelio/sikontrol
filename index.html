@@ -3,14 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="/src/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Roboto&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sikontrol</title>
     <script type="module" src="/src/main.ts" defer></script>
   </head>
 
   <body>
-    <h1 class="text-3xl font-bold underline">
-      Sikontrol
-    </h1>
+    <div class="flex h-screen">
+      <div class="w-[300px] flex flex-col bg-app-dark-gray">
+        <div class="flex flex-col p-[25px]">
+          <button class="font-montserrat font-bold text-[24px] h-[70px] bg-app-light-gray rounded-lg hover:bg-white hover:text-app-dark-gray duration-150">App</button>
+        </div>
+
+        <div class="flex-grow"></div>
+
+        <div class="w-full">
+          <hr class="border-t-2 border-white">
+        </div>
+
+        <div class="flex flex-col p-[25px]">
+          <button class="font-montserrat font-bold text-[24px] h-[70px] bg-app-light-gray rounded-lg hover:bg-white hover:text-app-dark-gray duration-150 mb-[25px]">Credits</button>
+          <button class="font-montserrat font-bold text-[24px] h-[70px] bg-app-light-gray rounded-lg hover:bg-white hover:text-app-dark-gray duration-150">Settings</button>
+        </div>
+      </div>
+
+      <div class="flex-grow bg-app-light-gray p-[25px]">
+        <div class="w-full h-full">
+          <span>App Page</span>
+        </div>
+
+        <div class="w-full h-full hidden">
+          <span>Credits Page</span>
+        </div>
+
+        <div class="w-full h-full hidden">
+          <span>Settings Page</span>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
