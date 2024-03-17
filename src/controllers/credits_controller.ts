@@ -52,8 +52,6 @@ export default class credits_controller extends Controller {
     }
 
     private insertCargoLibs(pkg: IToml) {
-        console.log(pkg);
-
         Object.keys(pkg.dependencies).forEach((dependency: string) => {
             const libLink: HTMLAnchorElement = document.createElement('a');
             libLink.href = `${this.crateBaseLink}${dependency}`;

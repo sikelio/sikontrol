@@ -6,12 +6,6 @@ export default class main_controller extends Controller<HTMLBodyElement> {
     declare readonly navbtnTargets: HTMLButtonElement[];
     declare readonly pageTargets: HTMLDivElement[];
 
-    public connect(): void {
-        console.log('Main controller loaded');
-        console.log(this.navbtnTargets);
-        console.log(this.pageTargets);
-    }
-
     public changePage(e: MouseEvent): void {
         e.preventDefault();
 
