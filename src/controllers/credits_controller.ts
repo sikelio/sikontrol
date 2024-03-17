@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api';
 import toml from 'toml';
 
 import type { IPackageJson } from '../interfaces/IPackageJson';
-import type { IToml, ITomlDependency } from '../interfaces/IToml';
+import type { IToml, ITomlDependencyCrates, ITomlDependencyGitHub } from '../interfaces/IToml';
 
 export default class credits_controller extends Controller {
     public static targets: string[] = ['npmlibs', 'npmdevlibs', 'cargolibs'];
@@ -57,7 +57,7 @@ export default class credits_controller extends Controller {
             libLink.href = `${this.crateBaseLink}${dependency}`;
             libLink.target = '_blank';
             libLink.classList.add('hover:text-gray-500', 'hover:underline');
-            libLink.textContent = `- ${dependency} - v${this.getCargoLibVersion(pkg.dependencies[dependency])}`;
+            libLink.textContent = `- ${dependency} - ${this.getCargoLibVersion(pkg.dependencies[dependency])}`;
 
             const libItem: HTMLLIElement = document.createElement('li');
             libItem.appendChild(libLink);
@@ -66,11 +66,15 @@ export default class credits_controller extends Controller {
         });
     }
 
-    private getCargoLibVersion(dependency: string | ITomlDependency): string {
+    private getCargoLibVersion(dependency: string | ITomlDependencyCrates | ITomlDependencyGitHub): string {
         if (typeof dependency === 'string') {
-            return dependency;
+            return `v${dependency}`;
+        } else if ('version' in dependency && 'features' in dependency) {
+            return `v${dependency.version}`;
+        } else if ('git' in dependency && 'branch' in dependency) {
+            return dependency.branch;
         }
-        
-        return dependency.version;
+
+        return 'undefined';
     }
 }

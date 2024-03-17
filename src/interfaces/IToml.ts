@@ -13,14 +13,19 @@ export interface IToml {
         }
     };
     dependencies: {
-        [key: string]: string | ITomlDependency;
+        [key: string]: string | ITomlDependencyCrates;
     };
     features: {
         'custom-protocol': string[]
     }
 }
 
-export interface ITomlDependency {
+export interface ITomlDependencyCrates {
     version: string,
     features: string[]
+}
+
+export interface ITomlDependencyGitHub {
+    git: string;
+    branch: string;
 }
