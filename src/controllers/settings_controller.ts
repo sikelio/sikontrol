@@ -50,4 +50,12 @@ export default class settings_controller extends Controller {
 
         label.classList.add('hidden');
     }
+
+    public toggleAutostart(e: InputEvent) {
+        e.preventDefault();
+
+        const checkbox: HTMLInputElement = e.currentTarget as HTMLInputElement;
+
+        return; // TODO: IPC Request
+    }
 }
