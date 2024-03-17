@@ -28,8 +28,8 @@
         </div>
       </div>
 
-      <div class="flex-grow bg-app-light-gray p-[25px]">
-        <div data-main-target="page" class="w-full h-full">
+      <div class="flex-grow bg-app-light-gray p-[45px]">
+        <div data-main-target="page" class="w-full h-full hidden">
           <span>App Page</span>
         </div>
 
@@ -37,8 +37,30 @@
           <span>Credits Page</span>
         </div>
 
-        <div data-main-target="page" class="w-full h-full hidden">
-          <span>Settings Page</span>
+        <div data-main-target="page" data-controller="settings" class="w-full h-full">
+          <form data-action="submit->settings#saveSettings">
+            <div>
+              <label for="port" class="text-[24px] text-white font-bold">
+                Port <br>
+                <span id="port-required" class="text-red-700 text-sm hidden">You have to enter a port</span>
+              </label>
+
+              <input data-settings-target="port" type="number" id="port" class="w-full mt-3 bg-white h-9 p-2 rounded-md focus:outline outline-white outline-2 outline-offset-2 text-app-dark-gray">
+            </div>
+
+            <div class="mt-[25px]">
+              <label for="token" class="text-[24px] text-white font-bold">
+                Token <br>
+                <span id="token-required" class="text-red-700 text-sm hidden">You have to enter a token</span>
+              </label>
+
+              <input data-settings-target="token" type="password" id="token" class="w-full mt-3 bg-white h-9 p-2 rounded-md focus:outline outline-white outline-2 outline-offset-2 text-app-dark-gray">
+            </div>
+
+            <div class="mt-[25px]">
+              <input type="submit" value="Save" class="w-1/4 mt-3 bg-white p-1 rounded-md focus:outline outline-white outline-2 outline-offset-2 text-app-light-gray font-bold text-lg hover:bg-green-700 hover:text-white duration-150">
+            </div>
+          </form>
         </div>
       </div>
     </div>
