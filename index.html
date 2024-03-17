@@ -29,8 +29,52 @@
       </div>
 
       <div class="flex-grow bg-app-light-gray p-[45px] overflow-y-auto">
-        <div data-main-target="page" class="w-full h-full">
-          <span>App Page</span>
+        <div data-main-target="page" data-controller="app" class="w-full h-full">
+          <span class="text-[24px] text-white font-bold">App</span>
+
+          <br><br>
+
+          <div class="flex">
+            <div class="flex-1">
+              <span class="text-[24px] text-white font-bold flex justify-center">Service State</span>
+
+              <br>
+
+              <span class="text-[20px] text-white">
+                Service: <span>Stopped</span>
+              </span>
+
+              <br>
+
+              <span class="text-[20px] text-white">
+                IP: <span data-app-target="ip">undefined</span>
+              </span>
+
+              <br>
+
+              <span class="text-[20px] text-white">
+                Port: <span>undefined</span>
+              </span>
+
+              <br>
+
+              <span class="text-[20px] text-white">
+                Token: <span>undefined</span>
+              </span>
+            </div>
+
+            <div class="flex-1">
+              <span class="text-[24px] text-white font-bold flex justify-center">Connected Devices</span>
+
+              <br>
+
+              <ul class="text-[20px] text-white" data-main-target="devices">
+                <li>
+                  <span>- Pixel 8 | xxx.xxx.xxx.xxx | xx:xx:xx:xx:xx:xx</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         <div data-main-target="page" data-controller="credits" class="w-full h-full hidden">
