@@ -1,6 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 import { invoke } from '@tauri-apps/api';
 
+import storeManager from '../libs/StoreManager';
+
 import type { IPackageJson } from '../interfaces/IPackageJson';
 
 export default class settings_controller extends Controller {
@@ -16,7 +18,7 @@ export default class settings_controller extends Controller {
         this.setPackageInfos(JSON.parse(packageJson));
     }
 
-    public saveSettings(e: SubmitEvent) {
+    public async saveSettings(e: SubmitEvent): Promise<void> {
         e.preventDefault();
 
         let errorCount: number = 0;
@@ -39,7 +41,11 @@ export default class settings_controller extends Controller {
             return;
         }
 
-        return // TODO: IPC request
+        try {
+            await storeManager.setValue('socketConfig', { port: this.portTarget.value, token: this.tokenTarget.value });
+        } catch (err: any) {
+            return;
+        }
     }
 
     private showErrorLabel(label: HTMLSpanElement | null): void {
