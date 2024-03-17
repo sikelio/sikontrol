@@ -1,5 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 import { invoke } from '@tauri-apps/api';
+import { enable, isEnabled, disable } from 'tauri-plugin-autostart-api';
 
 import storeManager from '../libs/StoreManager';
 import CustomAlert from '../libs/CustomAlert';
@@ -7,15 +8,21 @@ import CustomAlert from '../libs/CustomAlert';
 import type { IPackageJson } from '../interfaces/IPackageJson';
 
 export default class settings_controller extends Controller {
-    public static targets: string[] = ['port', 'token', 'version', 'socketform'];
+    public static targets: string[] = ['port', 'token', 'version', 'socketform', 'autostartcheck'];
 
     declare readonly portTarget: HTMLInputElement;
     declare readonly tokenTarget: HTMLInputElement;
     declare readonly versionTarget: HTMLSpanElement;
     declare readonly socketformTarget: HTMLFormElement;
+    declare readonly autostartcheckTarget: HTMLInputElement;
 
     public async connect() {
         const packageJson: string = await invoke('get_package_json');
+        const autostart = await isEnabled();
+
+        if (autostart === true) {
+            this.autostartcheckTarget.checked = true;
+        }
 
         this.setPackageInfos(JSON.parse(packageJson));
     }
@@ -67,9 +74,6 @@ export default class settings_controller extends Controller {
             return;
         }
 
-        console.error(label);
-        
-
         label.classList.remove('hidden');
     }
 
@@ -81,12 +85,27 @@ export default class settings_controller extends Controller {
         label.classList.add('hidden');
     }
 
-    public toggleAutostart(e: InputEvent) {
+    public async toggleAutostart(e: InputEvent) {
         e.preventDefault();
 
         const checkbox: HTMLInputElement = e.currentTarget as HTMLInputElement;
+        checkbox.disabled = true;
 
-        return; // TODO: IPC Request
+        try {
+            if (checkbox.checked === true) {
+                await enable();
+            } else {
+                await disable();
+            }
+        } catch (err: any) {
+            CustomAlert.Toast.fire({
+                icon: 'error',
+                title: 'An error occured',
+                text: err
+            });
+        }
+
+        checkbox.disabled = false;
     }
 
     private setPackageInfos(pkg: IPackageJson) {

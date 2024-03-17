@@ -2,8 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::net::IpAddr;
-
 use local_ip_address::local_ip;
+use tauri_plugin_autostart::MacosLauncher;
 
 const CARGO_TOML: &str = include_str!("../Cargo.toml");
 const PACKAGE_JSON: &str = include_str!("../../package.json");
@@ -34,6 +34,7 @@ fn get_ip() -> IpAddr {
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![greet, get_package_json, get_package_rust, get_ip])
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![])))
         .plugin(tauri_plugin_store::Builder::default().build())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
