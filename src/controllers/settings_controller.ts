@@ -2,15 +2,17 @@ import { Controller } from '@hotwired/stimulus';
 import { invoke } from '@tauri-apps/api';
 
 import storeManager from '../libs/StoreManager';
+import CustomAlert from '../libs/CustomAlert';
 
 import type { IPackageJson } from '../interfaces/IPackageJson';
 
 export default class settings_controller extends Controller {
-    public static targets: string[] = ['port', 'token', 'version'];
+    public static targets: string[] = ['port', 'token', 'version', 'socketform'];
 
     declare readonly portTarget: HTMLInputElement;
     declare readonly tokenTarget: HTMLInputElement;
     declare readonly versionTarget: HTMLSpanElement;
+    declare readonly socketformTarget: HTMLFormElement;
 
     public async connect() {
         const packageJson: string = await invoke('get_package_json');
@@ -43,8 +45,20 @@ export default class settings_controller extends Controller {
 
         try {
             await storeManager.setValue('socketConfig', { port: this.portTarget.value, token: this.tokenTarget.value });
+
+            CustomAlert.Toast.fire({
+                icon: 'success',
+                title: 'Settings saved',
+                text: 'Your settings have been saved'
+            });
+
+            this.socketformTarget.reset();
         } catch (err: any) {
-            return;
+            CustomAlert.Toast.fire({
+                icon: 'error',
+                title: 'An error occured',
+                text: err
+            });
         }
     }
 
