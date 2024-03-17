@@ -10,7 +10,7 @@
   </head>
 
   <body data-controller="main">
-    <div class="flex h-screen">
+    <div class="flex h-screen select-none">
       <div class="w-[300px] flex flex-col bg-app-dark-gray">
         <div class="flex flex-col p-[25px]">
           <button data-main-target="navbtn" data-action="click->main#changePage" class="font-montserrat font-bold text-[24px] h-[70px] rounded-lg hover:bg-white hover:text-app-dark-gray duration-150 active">App</button>
@@ -28,8 +28,8 @@
         </div>
       </div>
 
-      <div class="flex-grow bg-app-light-gray p-[45px]">
-        <div data-main-target="page" class="w-full h-full hidden">
+      <div class="flex-grow bg-app-light-gray p-[45px] overflow-y-scroll">
+        <div data-main-target="page" class="w-full h-full">
           <span>App Page</span>
         </div>
 
@@ -37,7 +37,7 @@
           <span>Credits Page</span>
         </div>
 
-        <div data-main-target="page" data-controller="settings" class="w-full h-full">
+        <div data-main-target="page" data-controller="settings" class="w-full h-full hidden">
           <form data-action="submit->settings#saveSettings">
             <div>
               <label for="port" class="text-[24px] text-white font-bold">
@@ -75,7 +75,7 @@
             <hr class="border-t-2 border-white">
           </div>
 
-          <div>
+          <div class="pb-[45px]">
             <p class="text-[24px] text-white">
               <span class="font-bold">About</span> <br><br>
 
