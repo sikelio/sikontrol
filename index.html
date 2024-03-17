@@ -9,11 +9,11 @@
     <script type="module" src="/src/main.ts" defer></script>
   </head>
 
-  <body>
+  <body data-controller="main">
     <div class="flex h-screen">
       <div class="w-[300px] flex flex-col bg-app-dark-gray">
         <div class="flex flex-col p-[25px]">
-          <button class="font-montserrat font-bold text-[24px] h-[70px] bg-app-light-gray rounded-lg hover:bg-white hover:text-app-dark-gray duration-150">App</button>
+          <button data-main-target="navbtn" data-action="click->main#changePage" class="font-montserrat font-bold text-[24px] h-[70px] rounded-lg hover:bg-white hover:text-app-dark-gray duration-150 active">App</button>
         </div>
 
         <div class="flex-grow"></div>
@@ -23,21 +23,21 @@
         </div>
 
         <div class="flex flex-col p-[25px]">
-          <button class="font-montserrat font-bold text-[24px] h-[70px] bg-app-light-gray rounded-lg hover:bg-white hover:text-app-dark-gray duration-150 mb-[25px]">Credits</button>
-          <button class="font-montserrat font-bold text-[24px] h-[70px] bg-app-light-gray rounded-lg hover:bg-white hover:text-app-dark-gray duration-150">Settings</button>
+          <button data-main-target="navbtn" data-action="click->main#changePage" class="font-montserrat font-bold text-[24px] h-[70px] rounded-lg hover:bg-white hover:text-app-dark-gray duration-150 nonactive mb-[25px]">Credits</button>
+          <button data-main-target="navbtn" data-action="click->main#changePage" class="font-montserrat font-bold text-[24px] h-[70px] rounded-lg hover:bg-white hover:text-app-dark-gray duration-150 nonactive">Settings</button>
         </div>
       </div>
 
       <div class="flex-grow bg-app-light-gray p-[25px]">
-        <div class="w-full h-full">
+        <div data-main-target="page" class="w-full h-full">
           <span>App Page</span>
         </div>
 
-        <div class="w-full h-full hidden">
+        <div data-main-target="page" class="w-full h-full hidden">
           <span>Credits Page</span>
         </div>
 
-        <div class="w-full h-full hidden">
+        <div data-main-target="page" class="w-full h-full hidden">
           <span>Settings Page</span>
         </div>
       </div>
