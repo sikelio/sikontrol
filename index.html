@@ -41,7 +41,7 @@
               <br>
 
               <span class="text-[20px] text-white">
-                Service: <span>Stopped</span>
+                Service: <span data-app-target="servivestatus">Stopped</span>
               </span>
 
               <br>
@@ -61,6 +61,22 @@
               <span class="text-[20px] text-white">
                 Token: <span data-app-target="token"></span>
               </span>
+
+              <br><br>
+
+              <div class="flex flex-row">
+                <button data-action="click->app#startServer" data-app-target="startbtn" class="flex items-center gap-2 px-4 py-2 text-white bg-app-dark-gray rounded-lg duration-150 hover:bg-white hover:text-app-dark-gray active:bg-app-dark-gray disabled:bg-app-light-gray border-2 border-app-light-gray disabled:border-white hover:disabled:text-white">
+                  <i class="fa-solid fa-play"></i>
+  
+                  Start
+                </button>
+  
+                <button data-action="click->app#stopServer" data-app-target="stopbtn" disabled class="ml-2 flex items-center gap-2 px-4 py-2 text-white bg-app-dark-gray rounded-lg duration-150 hover:bg-white hover:text-app-dark-gray active:bg-app-dark-gray disabled:bg-app-light-gray border-2 border-app-light-gray disabled:border-white hover:disabled:text-white">
+                  <i class="fa-solid fa-play"></i>
+  
+                  Stop
+                </button>
+              </div>
             </div>
 
             <div class="flex-1">
