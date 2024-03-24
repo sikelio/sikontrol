@@ -3,7 +3,7 @@
 
 mod socket_instance;
 
-use std::{error::Error, net::IpAddr};
+use std::{net::IpAddr, sync::Arc};
 use local_ip_address::local_ip;
 use socket_instance::SocketInstance;
 use tauri_plugin_autostart::MacosLauncher;
@@ -35,18 +35,19 @@ fn get_ip() -> IpAddr {
 }
 
 #[tauri::command]
-async fn start_server(socket_instance: tauri::State<'_, SocketInstance>, port: u16) -> Result<(), String> {
-    socket_instance.start(port).await.map_err(|e: Box<dyn Error>| e.to_string())
+async fn start_server(socket_instance: tauri::State<'_, Arc<SocketInstance>>, port: u16) -> Result<(), String> {
+    socket_instance.start(port).await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-async fn stop_server(socket_instance: tauri::State<'_, SocketInstance>) -> Result<(), String> {
-    socket_instance.stop().await.map_err(|e: Box<dyn Error>| e.to_string())
+async fn stop_server(socket_instance: tauri::State<'_, Arc<SocketInstance>>) -> Result<String, String> {
+    socket_instance.stop().await;
+    Ok("Socket instance stopped successfully".to_string())
 }
 
 fn main() {
     tauri::Builder::default()
-        .manage(SocketInstance::new())
+        .manage(Arc::new(SocketInstance::new()))
         .invoke_handler(tauri::generate_handler![greet, get_package_json, get_package_rust, get_ip, start_server, stop_server])
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![])))
         .plugin(tauri_plugin_store::Builder::default().build())

@@ -64,7 +64,7 @@ export default class app_controller extends Controller {
         }
     }
 
-    public stopServer(e: MouseEvent) {
+    public async stopServer(e: MouseEvent) {
         e.preventDefault();
 
         try {
@@ -72,7 +72,7 @@ export default class app_controller extends Controller {
             this.stopbtnTarget.disabled = true;
             this.servivestatusTarget.innerText = 'Stopped';
 
-            // await invoke('stop_server');
+            await invoke('stop_server');
         } catch (err: any) {
             this.startbtnTarget.disabled = true;
             this.stopbtnTarget.disabled = false;
