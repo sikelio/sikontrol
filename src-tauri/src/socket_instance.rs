@@ -1,4 +1,5 @@
 use axum::{routing::get, serve, Router};
+use enigo::*;
 use socketioxide::{extract::SocketRef, layer::SocketIoLayer, SocketIo};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -23,14 +24,23 @@ impl SocketInstance {
         self.io.ns("/", |s: SocketRef| {
             s.on("play_pause", || {
                 println!("Received 'play_pause event'");
+
+                let mut enigo: Enigo = Enigo::new();
+                enigo.key_down(Key::MediaPlayPause);
             });
 
             s.on("prev_track", || {
                 println!("Received 'prev_track event'");
+
+                let mut enigo: Enigo = Enigo::new();
+                enigo.key_down(Key::MediaPrevTrack);
             });
 
             s.on("next_track", || {
                 println!("Received 'next_track event'");
+
+                let mut enigo: Enigo = Enigo::new();
+                enigo.key_down(Key::MediaNextTrack);
             });
         });
 

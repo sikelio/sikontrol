@@ -40,11 +40,11 @@ export default class app_controller extends Controller {
         e.preventDefault();
 
         try {
-            // await invoke('start_server');
-
             this.startbtnTarget.disabled = true;
             this.stopbtnTarget.disabled = false;
             this.servivestatusTarget.innerText = 'Started';
+
+            await invoke('start_server');            
         } catch (err: any) {
             this.startbtnTarget.disabled = false;
             this.stopbtnTarget.disabled = true;
@@ -56,11 +56,11 @@ export default class app_controller extends Controller {
         e.preventDefault();
 
         try {
-            // await invoke('stop_server');
-
             this.startbtnTarget.disabled = false;
             this.stopbtnTarget.disabled = true;
             this.servivestatusTarget.innerText = 'Stopped';
+
+            // await invoke('stop_server');
         } catch (err: any) {
             this.startbtnTarget.disabled = true;
             this.stopbtnTarget.disabled = false;
