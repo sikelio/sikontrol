@@ -20,7 +20,7 @@ impl SocketInstance {
         }
     }
 
-    pub async fn start(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn start(&self, port: u16) -> Result<(), Box<dyn std::error::Error>> {
         self.io.ns("/", |s: SocketRef| {
             s.on("play_pause", || {
                 println!("Received 'play_pause event'");
@@ -56,7 +56,10 @@ impl SocketInstance {
                     .layer(local_layer)
             );
 
-        let listener: TcpListener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
+        let mut address: String = "0.0.0.0:".to_owned();
+        address.push_str(&port.to_string());
+
+        let listener: TcpListener = TcpListener::bind(address).await.unwrap();
         serve(listener, app).await.unwrap();
 
         println!("Socket IO instance started");

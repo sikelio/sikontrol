@@ -35,8 +35,8 @@ fn get_ip() -> IpAddr {
 }
 
 #[tauri::command]
-async fn start_server(socket_instance: tauri::State<'_, SocketInstance>) -> Result<(), String> {
-    socket_instance.start().await.map_err(|e: Box<dyn Error>| e.to_string())
+async fn start_server(socket_instance: tauri::State<'_, SocketInstance>, port: u16) -> Result<(), String> {
+    socket_instance.start(port).await.map_err(|e: Box<dyn Error>| e.to_string())
 }
 
 #[tauri::command]

@@ -51,7 +51,7 @@ export default class settings_controller extends Controller {
         }
 
         try {
-            await storeManager.setValue('socketConfig', { port: this.portTarget.value, token: this.tokenTarget.value });
+            await storeManager.setValue('socketConfig', { port: Number(this.portTarget.value), token: this.tokenTarget.value });
 
             CustomAlert.Toast.fire({
                 icon: 'success',
