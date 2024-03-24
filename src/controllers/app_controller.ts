@@ -20,9 +20,10 @@ export default class app_controller extends Controller {
     public async connect() {
         const ip: string = await invoke('get_ip');
 
-        this.ipTarget.textContent = ip
-
+        this.ipTarget.textContent = ip;
         this.fillSocketConfig();
+
+        document.addEventListener('settings-saved', async () => await this.fillSocketConfig());
     }
 
     private async fillSocketConfig() {
