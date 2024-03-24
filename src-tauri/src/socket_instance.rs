@@ -21,28 +21,7 @@ impl SocketInstance {
     }
 
     pub async fn start(&self, port: u16) -> Result<(), Box<dyn std::error::Error>> {
-        self.io.ns("/", |s: SocketRef| {
-            s.on("play_pause", || {
-                println!("Received 'play_pause event'");
-
-                let mut enigo: Enigo = Enigo::new();
-                enigo.key_down(Key::MediaPlayPause);
-            });
-
-            s.on("prev_track", || {
-                println!("Received 'prev_track event'");
-
-                let mut enigo: Enigo = Enigo::new();
-                enigo.key_down(Key::MediaPrevTrack);
-            });
-
-            s.on("next_track", || {
-                println!("Received 'next_track event'");
-
-                let mut enigo: Enigo = Enigo::new();
-                enigo.key_down(Key::MediaNextTrack);
-            });
-        });
+        self.io.ns("/", SocketInstance::handle_events);
 
         let local_io: SocketIo = self.io.clone();
         let local_layer: SocketIoLayer = self.layer.clone();
@@ -69,5 +48,22 @@ impl SocketInstance {
 
     pub async fn stop(&self) -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
+    }
+
+    pub fn handle_events(s: SocketRef) {
+        s.on("play_pause", || {
+            let mut enigo: Enigo = Enigo::new();
+            enigo.key_down(Key::MediaPlayPause);
+        });
+
+        s.on("prev_track", || {
+            let mut enigo: Enigo = Enigo::new();
+            enigo.key_down(Key::MediaPrevTrack);
+        });
+
+        s.on("next_track", || {
+            let mut enigo: Enigo = Enigo::new();
+            enigo.key_down(Key::MediaNextTrack);
+        });
     }
 }
