@@ -1,22 +1,14 @@
-import { invoke } from "@tauri-apps/api/tauri";
+import { Application } from '@hotwired/stimulus';
 
-let greetInputEl: HTMLInputElement | null;
-let greetMsgEl: HTMLElement | null;
+import main_controller from './controllers/main_controller';
+import app_controller from './controllers/app_controller';
+import credits_controller from './controllers/credits_controller';
+import settings_controller from './controllers/settings_controller';
 
-async function greet() {
-  if (greetMsgEl && greetInputEl) {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    greetMsgEl.textContent = await invoke("greet", {
-      name: greetInputEl.value,
-    });
-  }
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  greetInputEl = document.querySelector("#greet-input");
-  greetMsgEl = document.querySelector("#greet-msg");
-  document.querySelector("#greet-form")?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    greet();
-  });
+window.addEventListener('DOMContentLoaded', async (): Promise<void> => {
+  const application: Application = Application.start();
+  application.register('main', main_controller);
+  application.register('app', app_controller);
+  application.register('credits', credits_controller);
+  application.register('settings', settings_controller);
 });

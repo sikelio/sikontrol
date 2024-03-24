@@ -3,14 +3,223 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="/src/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Roboto&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sikontrol</title>
     <script type="module" src="/src/main.ts" defer></script>
   </head>
 
-  <body>
-    <h1 class="text-3xl font-bold underline">
-      Sikontrol
-    </h1>
+  <body data-controller="main">
+    <div class="flex h-screen select-none">
+      <div class="w-[300px] flex flex-col bg-app-dark-gray">
+        <div class="flex flex-col p-[25px]">
+          <button data-main-target="navbtn" data-action="click->main#changePage" class="font-montserrat font-bold text-[24px] h-[70px] rounded-lg hover:bg-white hover:text-app-dark-gray duration-150 active">App</button>
+        </div>
+
+        <div class="flex-grow"></div>
+
+        <div class="w-full">
+          <hr class="border-t-2 border-white">
+        </div>
+
+        <div class="flex flex-col p-[25px]">
+          <button data-main-target="navbtn" data-action="click->main#changePage" class="font-montserrat font-bold text-[24px] h-[70px] rounded-lg hover:bg-white hover:text-app-dark-gray duration-150 nonactive mb-[25px]">Credits</button>
+          <button data-main-target="navbtn" data-action="click->main#changePage" class="font-montserrat font-bold text-[24px] h-[70px] rounded-lg hover:bg-white hover:text-app-dark-gray duration-150 nonactive">Settings</button>
+        </div>
+      </div>
+
+      <div class="flex-grow bg-app-light-gray p-[45px] overflow-y-auto">
+        <div data-main-target="page" data-controller="app" class="w-full h-full">
+          <span class="text-[24px] text-white font-bold">App</span>
+
+          <br><br>
+
+          <div class="flex">
+            <div class="flex-1">
+              <span class="text-[24px] text-white font-bold flex justify-center">Service State</span>
+
+              <br>
+
+              <span class="text-[20px] text-white">
+                Service: <span data-app-target="servivestatus">Stopped</span>
+              </span>
+
+              <br>
+
+              <span class="text-[20px] text-white">
+                IP: <span data-app-target="ip">undefined</span>
+              </span>
+
+              <br>
+
+              <span class="text-[20px] text-white">
+                Port: <span data-app-target="port"></span>
+              </span>
+
+              <br>
+
+              <span class="text-[20px] text-white">
+                Token: <span data-app-target="token"></span>
+              </span>
+
+              <br><br>
+
+              <div class="flex flex-row">
+                <button data-action="click->app#startServer" data-app-target="startbtn" class="flex items-center gap-2 px-4 py-2 text-white bg-app-dark-gray rounded-lg duration-150 hover:bg-white hover:text-app-dark-gray active:bg-app-dark-gray disabled:bg-app-light-gray border-2 border-app-light-gray disabled:border-white hover:disabled:text-white">
+                  <i class="fa-solid fa-play"></i>
+  
+                  Start
+                </button>
+  
+                <button data-action="click->app#stopServer" data-app-target="stopbtn" disabled class="ml-2 flex items-center gap-2 px-4 py-2 text-white bg-app-dark-gray rounded-lg duration-150 hover:bg-white hover:text-app-dark-gray active:bg-app-dark-gray disabled:bg-app-light-gray border-2 border-app-light-gray disabled:border-white hover:disabled:text-white">
+                  <i class="fa-solid fa-play"></i>
+  
+                  Stop
+                </button>
+              </div>
+            </div>
+
+            <div class="flex-1">
+              <span class="text-[24px] text-white font-bold flex justify-center">Connected Devices</span>
+
+              <br>
+
+              <ul class="text-[20px] text-white" data-main-target="devices">
+                <li>
+                  <span>- Pixel 8 | xxx.xxx.xxx.xxx | xx:xx:xx:xx:xx:xx</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div data-main-target="page" data-controller="credits" class="w-full h-full hidden">
+          <span class="text-[24px] text-white font-bold">Credits</span>
+
+          <br><br>
+
+          <div class="flex">
+            <div class="flex-1">
+              <span class="text-[24px] text-white font-bold flex justify-center">NPM</span>
+
+              <br><br>
+
+              <span class="text-[20px] text-white font-bold flex justify-center">Dependencies</span>
+
+              <br>
+
+              <ul class="text-[16px] text-white" data-credits-target="npmlibs"></ul>
+
+              <br>
+
+              <span class="text-[20px] text-white font-bold flex justify-center">Dev Dependencies</span>
+
+              <br>
+
+              <ul class="text-[16px] text-white" data-credits-target="npmdevlibs"></ul>
+            </div>
+  
+            <div class="flex-1">
+              <span class="text-[24px] text-white font-bold flex justify-center">Cargo</span>
+
+              <br><br>
+
+              <span class="text-[20px] text-white font-bold flex justify-center">Dependencies</span>
+
+              <br>
+
+              <ul class="text-[16px] text-white" data-credits-target="cargolibs"></ul>
+
+              <br>
+
+              <span class="text-[20px] text-white font-bold flex justify-center">With the help of</span>
+
+              <ul class="text-[16px] text-white" data-credits-target="helpers"></ul>
+            </div>
+          </div>
+        </div>
+
+        <div data-main-target="page" data-controller="settings" class="w-full h-full hidden">
+          <form data-action="submit->settings#saveSettings" data-settings-target="socketform">
+            <div>
+              <label for="port" class="text-[24px] text-white font-bold">
+                Port <br>
+                <span id="port-required" class="text-red-700 text-sm hidden">You have to enter a port</span>
+              </label>
+
+              <input data-settings-target="port" type="number" id="port" class="w-full mt-3 bg-white h-9 p-2 rounded-md focus:outline outline-white outline-2 outline-offset-2 text-app-dark-gray">
+            </div>
+
+            <div class="mt-[25px]">
+              <label for="token" class="text-[24px] text-white font-bold">
+                Token <br>
+                <span id="token-required" class="text-red-700 text-sm hidden">You have to enter a token</span>
+              </label>
+
+              <input data-settings-target="token" type="password" id="token" class="w-full mt-3 bg-white h-9 p-2 rounded-md focus:outline outline-white outline-2 outline-offset-2 text-app-dark-gray">
+            </div>
+
+            <div class="mt-[25px]">
+              <input type="submit" value="Save" class="w-1/4 mt-3 bg-white p-1 rounded-md focus:outline outline-white outline-2 outline-offset-2 text-app-light-gray font-bold text-lg hover:bg-green-700 hover:text-white duration-150">
+            </div>
+          </form>
+
+          <div class="w-full mt-[40px] mb-[30px]">
+            <hr class="border-t-2 border-white">
+          </div>
+
+          <label class="label cursor-pointer">
+            <span class="text-[24px] font-montserrat text-white font-bold">Autostart ?</span> 
+            <input type="checkbox" class="checkbox" data-action="input->settings#toggleAutostart" data-settings-target="autostartcheck" />
+          </label>
+
+          <div class="w-full mt-[30px] mb-[30px]">
+            <hr class="border-t-2 border-white">
+          </div>
+
+          <div class="pb-[45px]">
+            <p class="text-[24px] text-white">
+              <span class="font-bold mb-5">About</span>
+
+              <br>
+
+              <div class="mt-5">
+                <div class="text-white">
+                  <span class="text-[16px]">
+                    Sikontrol <span data-settings-target="version"></span>
+                  </span>
+    
+                  <br>
+    
+                  <span class="text-[16px]">
+                    Licence: GPLv3
+                  </span>
+                </div>
+  
+                <br>
+  
+                <div class="text-white">
+                  <span class="text-[16px]">
+                    Author: <a href="https://github.com/sikelio" class="hover:text-gray-500 hover:underline" target="_blank">Sikelio</a>
+                  </span>
+    
+                  <br>
+    
+                  <span class="text-[16px]">
+                    Website: <a href="https://github.com/sikelio/sikontrol" class="hover:text-gray-500 hover:underline" target="_blank">https://github.com/sikelio/sikontrol</a>
+                  </span>
+    
+                  <br>
+    
+                  <span class="text-[16px]">
+                    Support: <a href="https://github.com/sikelio/sikontrol/issues" class="hover:text-gray-500 hover:underline" target="_blank">https://github.com/sikelio/sikontrol/issues</a>
+                  </span>
+                </div>
+              </div>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
