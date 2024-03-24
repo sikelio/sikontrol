@@ -28,4 +28,3 @@ The following functions are yet not implemented but will be in some time.
 
 * Main volume controller
 * Individually app volume controller
-* Stopping the websocket instance

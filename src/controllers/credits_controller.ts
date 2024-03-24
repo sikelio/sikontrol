@@ -35,7 +35,7 @@ export default class credits_controller extends Controller {
             libLink.href = `${this.npmBaseLink}${dependency}`;
             libLink.target = '_blank';
             libLink.classList.add('hover:text-gray-500', 'hover:underline');
-            libLink.textContent = `- ${dependency} - ${this.formatNpmPackageVersion(pkg.dependencies[dependency])}`;;
+            libLink.textContent = `- ${dependency} - ${this.formatNpmPackageVersion(pkg.dependencies[dependency])}`;
 
             const libItem: HTMLLIElement = document.createElement('li');
             libItem.appendChild(libLink);
@@ -74,16 +74,23 @@ export default class credits_controller extends Controller {
 
     private insertHelpers(helpers: IHelper[]) {
         helpers.forEach((helper: IHelper) => {
+            const helperSpan: HTMLSpanElement = document.createElement('span');
+            helperSpan.textContent = helper.username;
+            helperSpan.classList.add('text-white', 'mt-2');
+
+            const avatarImg: HTMLImageElement = document.createElement('img');
+            avatarImg.classList.add('inline-block', 'h-12', 'w-12', 'rounded-full', 'ring-2', 'ring-white', 'm-auto');
+            avatarImg.alt = helper.username;
+            avatarImg.src = new URL(`../assets/helpers/${helper.avatar}`, import.meta.url).href;
+
             const helperLink: HTMLAnchorElement = document.createElement('a');
             helperLink.href = helper.url;
             helperLink.target = '_blank';
-            helperLink.classList.add('hover:text-gray-500', 'hover:underline');
-            helperLink.textContent = `- ${helper.username}`;
+            helperLink.classList.add('flex', 'flex-col', 'text-center', 'hover:underline');
+            helperLink.appendChild(avatarImg);
+            helperLink.appendChild(helperSpan);
 
-            const helperItem: HTMLLIElement = document.createElement('li');
-            helperItem.appendChild(helperLink);
-
-            this.helpersTarget.appendChild(helperItem);
+            this.helpersTarget.appendChild(helperLink);
         });
     }
 

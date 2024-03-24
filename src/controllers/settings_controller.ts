@@ -59,7 +59,10 @@ export default class settings_controller extends Controller {
                 text: 'Your settings have been saved'
             });
 
-            this.socketformTarget.reset();
+            // this.socketformTarget.reset();
+            
+            const settingsEvent = new CustomEvent('settings-saved', { bubbles: true });
+            document.dispatchEvent(settingsEvent);
         } catch (err: any) {
             CustomAlert.Toast.fire({
                 icon: 'error',
