@@ -21,8 +21,6 @@ export default class main_controller extends Controller<HTMLBodyElement> {
             }
         });
 
-        
-        
         this.showPage(btnIndex);
     }
 
