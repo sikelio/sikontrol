@@ -1,10 +1,12 @@
 use axum::{routing::get, serve, Router};
 use enigo::*;
-use socketioxide::{extract::SocketRef, layer::SocketIoLayer, SocketIo};
+use socketioxide::{extract::{Data, SocketRef}, layer::SocketIoLayer, SocketIo};
 use std::{future::IntoFuture, sync::Arc};
 use tokio::{net::TcpListener, sync::Notify};
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
+
+use crate::audio_controller::AudioController;
 
 pub struct SocketInstance {
     io: SocketIo,
@@ -74,5 +76,9 @@ impl SocketInstance {
             let mut enigo: Enigo = Enigo::new();
             enigo.key_down(Key::MediaNextTrack);
         });
+
+        s.on("change_main_volume", |_s: SocketRef, Data::<f32>(volume)| {
+            let _ = AudioController::change_main_volume(volume);
+        })
     }
 }

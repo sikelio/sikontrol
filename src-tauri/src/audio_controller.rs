@@ -5,9 +5,9 @@ use windows::{
     },
     Win32::{
         Media::Audio::{
-            eRender, IMMDevice, IMMDeviceCollection, IMMDeviceEnumerator, MMDeviceEnumerator, DEVICE_STATE_ACTIVE
+            eConsole, eRender, Endpoints::IAudioEndpointVolume, IMMDevice, IMMDeviceCollection, IMMDeviceEnumerator, MMDeviceEnumerator, DEVICE_STATE_ACTIVE
         }, System::Com::{
-            CoCreateInstance, CLSCTX_ALL
+            CoCreateInstance, CoInitialize, CoUninitialize, CLSCTX_ALL, CLSCTX_INPROC_SERVER
         }
     }
 };
@@ -32,12 +32,32 @@ impl AudioController {
             Ok(sessions)
         }
     }
-    
+
     fn pwstr_to_string(pwstr: PWSTR) -> Result<String> {
         unsafe {
             let len = (0..).take_while(|&i| *pwstr.0.add(i) != 0).count();
             let slice = from_raw_parts(pwstr.0, len);
             Ok(String::from_utf16_lossy(slice))
+        }
+    }
+
+    pub fn change_main_volume(volume: f32) -> windows::core::Result<()> {
+        if volume < 0.0 || volume > 1.0 {
+            panic!("The value send to set the volume need to be between or equals of 0.0 and 1.0");
+        }
+
+        unsafe {
+            let _ = CoInitialize(None);
+
+            let device_enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER)?;
+            let default_device = device_enumerator.GetDefaultAudioEndpoint(eRender, eConsole)?;
+
+            let endpoint_volume: IAudioEndpointVolume = default_device.Activate(CLSCTX_INPROC_SERVER, None)?;
+            endpoint_volume.SetMasterVolumeLevelScalar(volume, std::ptr::null())?;
+
+            CoUninitialize();
+
+            Ok(())
         }
     }
 }
