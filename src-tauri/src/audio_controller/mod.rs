@@ -17,7 +17,7 @@ use windows::{
 
 pub struct AudioController {}
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Session {
     pub pid: u32,
     pub name: String

@@ -47,6 +47,8 @@ impl SocketInstance {
             let app_handle = local_app_handle.clone();
             let _ = app_handle.emit_all("new_client", &s.id);
 
+            s.emit("sessions", &serde_json::json!({ "sessions": AudioController::get_audio_sessions() })).ok();
+
             s.on("play_pause", || {
                 let mut enigo: Enigo = Enigo::new();
                 enigo.key_down(Key::MediaPlayPause);
