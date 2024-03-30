@@ -59,23 +59,21 @@ impl AudioController {
         }
     }
 
-    pub fn change_main_volume(volume: f32) -> WindowsResult<()> {
+    pub fn change_main_volume(volume: f32) {
         if volume < 0.0 || volume > 1.0 {
-            panic!("The value send to set the volume need to be between or equals of 0.0 and 1.0");
+            return;
         }
 
         unsafe {
             let _ = CoInitialize(None);
 
-            let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER)?;
-            let device = enumerator.GetDefaultAudioEndpoint(eRender, eConsole)?;
+            let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER).unwrap();
+            let device = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
 
-            let endpoint: IAudioEndpointVolume = device.Activate(CLSCTX_INPROC_SERVER, None)?;
-            endpoint.SetMasterVolumeLevelScalar(volume, std::ptr::null())?;
+            let endpoint: IAudioEndpointVolume = device.Activate(CLSCTX_INPROC_SERVER, None).unwrap();
+            let _ = endpoint.SetMasterVolumeLevelScalar(volume, std::ptr::null());
 
             CoUninitialize();
-
-            Ok(())
         }
     }
 
@@ -103,6 +101,8 @@ impl AudioController {
                     let _ = audio_volume.SetMasterVolume(volume, std::ptr::null());
                 }
             }
+
+            CoUninitialize();
         }
     }
 }

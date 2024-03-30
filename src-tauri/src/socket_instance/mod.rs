@@ -86,13 +86,13 @@ impl SocketInstance {
         });
 
         s.on("change_main_volume", |_s: SocketRef, Data::<String>(volume)| {
-            let _ = AudioController::change_main_volume(volume.parse::<f32>().unwrap());
+            AudioController::change_main_volume(volume.parse::<f32>().unwrap());
         });
 
         s.on("change_app_volume", |_s: SocketRef, Data::<Value>(values)| {
             let data: ChangeAppVolumeEvent = serde_json::from_value(values).unwrap();
 
             AudioController::change_app_volume(data.pid, data.volume);
-        })
+        });
     }
 }
