@@ -24,6 +24,9 @@ export default class app_controller extends Controller {
         this.fillSocketConfig();
 
         document.addEventListener('settings-saved', async () => await this.fillSocketConfig());
+
+        const sessions = await invoke('get_sessions');
+        console.log(sessions);
     }
 
     private async fillSocketConfig() {

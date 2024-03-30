@@ -1,9 +1,11 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod audio_controller;
 mod socket_instance;
 
 use std::{net::IpAddr, sync::Arc};
+use audio_controller::{AudioController, Session};
 use local_ip_address::local_ip;
 use socket_instance::SocketInstance;
 use tauri_plugin_autostart::MacosLauncher;
@@ -45,10 +47,15 @@ async fn stop_server(socket_instance: tauri::State<'_, Arc<SocketInstance>>) -> 
     Ok("Socket instance stopped successfully".to_string())
 }
 
+#[tauri::command]
+fn get_sessions() -> Vec<Session> {
+    AudioController::get_audio_sessions()
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(Arc::new(SocketInstance::new()))
-        .invoke_handler(tauri::generate_handler![greet, get_package_json, get_package_rust, get_ip, start_server, stop_server])
+        .invoke_handler(tauri::generate_handler![greet, get_package_json, get_package_rust, get_ip, start_server, stop_server, get_sessions])
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![])))
         .plugin(tauri_plugin_store::Builder::default().build())
         .run(tauri::generate_context!())

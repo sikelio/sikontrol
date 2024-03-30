@@ -23,6 +23,7 @@ The project is not yet ready but the basic functions (Play, Pause, Next, Prev) a
 * Play or Pause : `play_pause`
 * Next Track : `next_track`
 * Prev Track : `prev_track`
+* Change Main Volume : `change_main_volume` (value between 0 and 1)
 
 The following functions are yet not implemented but will be in some time.
 
