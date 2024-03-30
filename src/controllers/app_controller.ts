@@ -24,9 +24,6 @@ export default class app_controller extends Controller {
         this.fillSocketConfig();
 
         document.addEventListener('settings-saved', async () => await this.fillSocketConfig());
-
-        const sessions = await invoke('get_sessions');
-        console.log(sessions);
     }
 
     private async fillSocketConfig() {
@@ -38,6 +35,16 @@ export default class app_controller extends Controller {
         } else {
             this.portTarget.textContent = (socketConfig as ISocketConfig).port.toString();
             this.tokenTarget.textContent = (socketConfig as ISocketConfig).token;
+        }
+
+        const isStarted: boolean = await invoke('is_socket_started');
+
+        if (isStarted === true) {
+            this.startbtnTarget.disabled = true;
+            this.stopbtnTarget.disabled = false;
+        } else {
+            this.startbtnTarget.disabled = false;
+            this.stopbtnTarget.disabled = true;
         }
     }
 

@@ -3,7 +3,7 @@ use enigo::*;
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use socketioxide::{extract::{Data, SocketRef}, layer::SocketIoLayer, SocketIo};
-use std::{future::IntoFuture, sync::Arc};
+use std::{future::IntoFuture, sync::{Arc, Mutex}};
 use tokio::{net::TcpListener, sync::Notify};
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
@@ -20,17 +20,20 @@ pub struct SocketInstance {
     io: SocketIo,
     layer: SocketIoLayer,
     notify_shutdown: Arc<Notify>,
+    pub is_started: Arc<Mutex<bool>>
 }
 
 impl SocketInstance {
     pub fn new() -> Self {
         let (layer, io) = SocketIo::new_layer();
         let notify_shutdown = Arc::new(Notify::new());
+        let is_started = Arc::new(Mutex::new(false));
 
         SocketInstance {
             io,
             layer,
             notify_shutdown,
+            is_started,
         }
     }
 
@@ -52,6 +55,12 @@ impl SocketInstance {
 
         let address = format!("0.0.0.0:{}", port);
         let listener = TcpListener::bind(&address).await?;
+
+        {
+            let mut started = self.is_started.lock().unwrap();
+            *started = true;
+        }
+
         let server = serve(listener, app).into_future();
 
         tokio::select! {
@@ -66,6 +75,11 @@ impl SocketInstance {
     }
 
     pub async fn stop(&self) {
+        {
+            let mut started = self.is_started.lock().unwrap();
+            *started = false;
+        }
+
         self.notify_shutdown.notify_one();
     }
 

@@ -48,6 +48,12 @@ async fn stop_server(socket_instance: tauri::State<'_, Arc<SocketInstance>>) -> 
 }
 
 #[tauri::command]
+fn is_socket_started(socket_instance: tauri::State<'_, Arc<SocketInstance>>) -> bool {
+    let is_started = socket_instance.is_started.lock().unwrap();
+    *is_started
+}
+
+#[tauri::command]
 fn get_sessions() -> Vec<Session> {
     AudioController::get_audio_sessions()
 }
@@ -55,7 +61,10 @@ fn get_sessions() -> Vec<Session> {
 fn main() {
     tauri::Builder::default()
         .manage(Arc::new(SocketInstance::new()))
-        .invoke_handler(tauri::generate_handler![greet, get_package_json, get_package_rust, get_ip, start_server, stop_server, get_sessions])
+        .invoke_handler(tauri::generate_handler![
+            greet, get_package_json, get_package_rust, get_ip,
+            start_server, stop_server, is_socket_started, get_sessions
+        ])
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![])))
         .plugin(tauri_plugin_store::Builder::default().build())
         .run(tauri::generate_context!())
