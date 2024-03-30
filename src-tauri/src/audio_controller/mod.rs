@@ -1,47 +1,67 @@
-use std::slice::from_raw_parts;
+use std::{slice::from_raw_parts, u32};
+use serde::{Serialize, Deserialize};
 use windows::{
     core::{
-        Result, PWSTR
+        Interface, Result as WindowsResult, PWSTR
     },
     Win32::{
         Media::Audio::{
-            eConsole, eRender, Endpoints::IAudioEndpointVolume, IMMDevice, IMMDeviceCollection, IMMDeviceEnumerator, MMDeviceEnumerator, DEVICE_STATE_ACTIVE
+            eConsole, eRender, Endpoints::IAudioEndpointVolume, IAudioSessionControl,
+            IAudioSessionControl2, IAudioSessionEnumerator, IAudioSessionManager2,
+            IMMDevice, IMMDeviceEnumerator, MMDeviceEnumerator
         }, System::Com::{
             CoCreateInstance, CoInitialize, CoUninitialize, CLSCTX_ALL, CLSCTX_INPROC_SERVER
-        }
-    }
+        },
+    },
 };
 
 pub struct AudioController {}
 
+#[derive(Serialize, Deserialize)]
+pub struct Session {
+    pid: u32,
+    name: String
+}
+
 impl AudioController {
-    pub fn get_audio_session() -> Result<Vec<String>> {
+    pub fn get_audio_sessions() -> Vec<Session> {
         unsafe {
-            let mm_device_enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_ALL)?;
-            let mm_device_collection: IMMDeviceCollection = mm_device_enumerator.EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE)?;
-            let count: u32 = mm_device_collection.GetCount()?;
-            let mut sessions: Vec<String> = Vec::new();
+            CoInitialize(None).unwrap();
+
+            let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_ALL).unwrap();
+            let device: IMMDevice = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
+            let session_manager: IAudioSessionManager2 = device.Activate(CLSCTX_ALL, None).unwrap();
+            let session_list: IAudioSessionEnumerator = session_manager.GetSessionEnumerator().unwrap();
+
+            let count: i32 = session_list.GetCount().unwrap();
+            let mut sessions: Vec<Session> = Vec::new();
 
             for i in 0..count {
-                let mm_device: IMMDevice = mm_device_collection.Item(i)?;
-                let session_id: PWSTR = mm_device.GetId()?;
+                let session_control: IAudioSessionControl = session_list.GetSession(i).unwrap();
+                let session_control_2: IAudioSessionControl2 = session_control.cast().unwrap();
 
-                sessions.push(AudioController::pwstr_to_string(session_id)?);
+                let pid: u32 = session_control_2.GetProcessId().unwrap();
+                let name: String = AudioController::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap();
+
+                if !name.is_empty() {
+                    sessions.push(Session { pid, name });
+                }
             }
 
-            Ok(sessions)
+            sessions
         }
     }
 
-    fn pwstr_to_string(pwstr: PWSTR) -> Result<String> {
+    fn pwstr_to_string(pwstr: PWSTR) -> WindowsResult<String> {
         unsafe {
             let len = (0..).take_while(|&i| *pwstr.0.add(i) != 0).count();
             let slice = from_raw_parts(pwstr.0, len);
+
             Ok(String::from_utf16_lossy(slice))
         }
     }
 
-    pub fn change_main_volume(volume: f32) -> windows::core::Result<()> {
+    pub fn change_main_volume(volume: f32) -> WindowsResult<()> {
         if volume < 0.0 || volume > 1.0 {
             panic!("The value send to set the volume need to be between or equals of 0.0 and 1.0");
         }
@@ -49,11 +69,11 @@ impl AudioController {
         unsafe {
             let _ = CoInitialize(None);
 
-            let device_enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER)?;
-            let default_device = device_enumerator.GetDefaultAudioEndpoint(eRender, eConsole)?;
+            let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER)?;
+            let device = enumerator.GetDefaultAudioEndpoint(eRender, eConsole)?;
 
-            let endpoint_volume: IAudioEndpointVolume = default_device.Activate(CLSCTX_INPROC_SERVER, None)?;
-            endpoint_volume.SetMasterVolumeLevelScalar(volume, std::ptr::null())?;
+            let endpoint: IAudioEndpointVolume = device.Activate(CLSCTX_INPROC_SERVER, None)?;
+            endpoint.SetMasterVolumeLevelScalar(volume, std::ptr::null())?;
 
             CoUninitialize();
 

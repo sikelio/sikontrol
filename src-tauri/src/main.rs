@@ -5,7 +5,7 @@ mod audio_controller;
 mod socket_instance;
 
 use std::{net::IpAddr, sync::Arc};
-use audio_controller::AudioController;
+use audio_controller::{AudioController, Session};
 use local_ip_address::local_ip;
 use socket_instance::SocketInstance;
 use tauri_plugin_autostart::MacosLauncher;
@@ -48,8 +48,8 @@ async fn stop_server(socket_instance: tauri::State<'_, Arc<SocketInstance>>) -> 
 }
 
 #[tauri::command]
-fn get_sessions() -> Result<Vec<String>, String> {
-    AudioController::get_audio_session().map_err(|e| e.to_string())
+fn get_sessions() -> Vec<Session> {
+    AudioController::get_audio_sessions()
 }
 
 fn main() {
