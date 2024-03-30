@@ -7,7 +7,7 @@ import CustomAlert from '../libs/CustomAlert';
 
 import type { IPackageJson } from '../interfaces/IPackageJson';
 
-export default class settings_controller extends Controller {
+export default class settings_controller extends Controller<HTMLDivElement> {
     public static targets: string[] = ['port', 'token', 'version', 'socketform', 'autostartcheck'];
 
     declare readonly portTarget: HTMLInputElement;
@@ -16,7 +16,7 @@ export default class settings_controller extends Controller {
     declare readonly socketformTarget: HTMLFormElement;
     declare readonly autostartcheckTarget: HTMLInputElement;
 
-    public async connect() {
+    public async connect(): Promise<void> {
         const packageJson: string = await invoke('get_package_json');
         const autostart = await isEnabled();
 
@@ -88,7 +88,7 @@ export default class settings_controller extends Controller {
         label.classList.add('hidden');
     }
 
-    public async toggleAutostart(e: InputEvent) {
+    public async toggleAutostart(e: InputEvent): Promise<void> {
         e.preventDefault();
 
         const checkbox: HTMLInputElement = e.currentTarget as HTMLInputElement;
@@ -111,7 +111,7 @@ export default class settings_controller extends Controller {
         checkbox.disabled = false;
     }
 
-    private setPackageInfos(pkg: IPackageJson) {
+    private setPackageInfos(pkg: IPackageJson): void {
         this.versionTarget.textContent = pkg.version
     }
 }

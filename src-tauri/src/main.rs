@@ -13,12 +13,6 @@ use tauri_plugin_autostart::MacosLauncher;
 const CARGO_TOML: &str = include_str!("../Cargo.toml");
 const PACKAGE_JSON: &str = include_str!("../../package.json");
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 #[tauri::command]
 fn get_package_json() -> String {
     PACKAGE_JSON.to_string()
@@ -62,8 +56,8 @@ fn main() {
     tauri::Builder::default()
         .manage(Arc::new(SocketInstance::new()))
         .invoke_handler(tauri::generate_handler![
-            greet, get_package_json, get_package_rust, get_ip,
-            start_server, stop_server, is_socket_started, get_sessions
+            get_package_json, get_package_rust, get_ip, start_server,
+            stop_server, is_socket_started, get_sessions
         ])
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![])))
         .plugin(tauri_plugin_store::Builder::default().build())

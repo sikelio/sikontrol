@@ -6,7 +6,7 @@ import storeManager from '../libs/StoreManager';
 
 import type { ISocketConfig } from '../interfaces/ISocket';
 
-export default class app_controller extends Controller {
+export default class app_controller extends Controller<HTMLDivElement> {
     public static targets: string[] = ['ip', 'devices', 'port', 'token', 'startbtn', 'stopbtn', 'servivestatus'];
 
     declare readonly ipTarget: HTMLSpanElement;
@@ -17,16 +17,16 @@ export default class app_controller extends Controller {
     declare readonly stopbtnTarget: HTMLButtonElement;
     declare readonly servivestatusTarget: HTMLSpanElement;
 
-    public async connect() {
+    public async connect(): Promise<void> {
         const ip: string = await invoke('get_ip');
 
         this.ipTarget.textContent = ip;
         this.fillSocketConfig();
 
-        document.addEventListener('settings-saved', async () => await this.fillSocketConfig());
+        document.addEventListener('settings-saved', async (): Promise<void> => await this.fillSocketConfig());
     }
 
-    private async fillSocketConfig() {
+    private async fillSocketConfig(): Promise<void> {
         const socketConfig = await storeManager.getValue('socketConfig');
 
         if (socketConfig === undefined || socketConfig === null) {
@@ -48,33 +48,39 @@ export default class app_controller extends Controller {
         }
     }
 
-    public async startServer(e: MouseEvent) {
+    public async startServer(e: MouseEvent): Promise<void> {
         e.preventDefault();
 
         try {
             const socketConfig = await storeManager.getValue('socketConfig');
 
             if (socketConfig === undefined || socketConfig === null) {
-                return CustomAlert.Toast.fire({
+                CustomAlert.Toast.fire({
                     icon: 'warning',
                     title: 'Settings error',
                     text: 'You must set some settings, at least a port.'
                 });
-            }            
+
+                return;
+            }
 
             this.startbtnTarget.disabled = true;
             this.stopbtnTarget.disabled = false;
             this.servivestatusTarget.innerText = 'Started';
 
             await invoke('start_server', { port: (socketConfig as ISocketConfig).port });
+
+            return;
         } catch (err: any) {
             this.startbtnTarget.disabled = false;
             this.stopbtnTarget.disabled = true;
             this.servivestatusTarget.innerText = 'Stopped';
+
+            return;
         }
     }
 
-    public async stopServer(e: MouseEvent) {
+    public async stopServer(e: MouseEvent): Promise<void> {
         e.preventDefault();
 
         try {

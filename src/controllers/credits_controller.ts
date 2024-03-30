@@ -8,7 +8,7 @@ import type { IPackageJson } from '../interfaces/IPackageJson';
 import type { IToml, ITomlDependencyCrates, ITomlDependencyGitHub } from '../interfaces/IToml';
 import type { IHelper } from '../interfaces/IHelper';
 
-export default class credits_controller extends Controller {
+export default class credits_controller extends Controller<HTMLDivElement> {
     public static targets: string[] = ['npmlibs', 'npmdevlibs', 'cargolibs', 'helpers'];
 
     declare readonly npmlibsTarget: HTMLUListElement;
@@ -19,7 +19,7 @@ export default class credits_controller extends Controller {
     private readonly npmBaseLink: string = 'https://www.npmjs.com/package/';
     private readonly crateBaseLink: string = 'https://crates.io/crates/';
 
-    public async connect() {
+    public async connect(): Promise<void> {
         const packgeJson: string = await invoke('get_package_json');
         const cargoToml: string = await invoke('get_package_rust');
         const helpers: IHelper[] = helpersList;
@@ -29,7 +29,7 @@ export default class credits_controller extends Controller {
         this.insertHelpers(helpers);
     }
 
-    private insertNpmLibs(pkg: IPackageJson) {
+    private insertNpmLibs(pkg: IPackageJson): void {
         Object.keys(pkg.dependencies).forEach((dependency: string) => {
             const libLink: HTMLAnchorElement = document.createElement('a');
             libLink.href = `${this.npmBaseLink}${dependency}`;
@@ -57,7 +57,7 @@ export default class credits_controller extends Controller {
         });
     }
 
-    private insertCargoLibs(pkg: IToml) {
+    private insertCargoLibs(pkg: IToml): void {
         Object.keys(pkg.dependencies).forEach((dependency: string) => {
             const libLink: HTMLAnchorElement = document.createElement('a');
             libLink.href = `${this.crateBaseLink}${dependency}`;
@@ -72,7 +72,7 @@ export default class credits_controller extends Controller {
         });
     }
 
-    private insertHelpers(helpers: IHelper[]) {
+    private insertHelpers(helpers: IHelper[]): void {
         helpers.forEach((helper: IHelper) => {
             const helperSpan: HTMLSpanElement = document.createElement('span');
             helperSpan.textContent = helper.username;

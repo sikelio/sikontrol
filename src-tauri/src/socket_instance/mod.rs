@@ -53,8 +53,8 @@ impl SocketInstance {
                     .layer(local_layer)
             );
 
-        let address = format!("0.0.0.0:{}", port);
-        let listener = TcpListener::bind(&address).await?;
+        let address: String = format!("0.0.0.0:{}", port);
+        let listener: TcpListener = TcpListener::bind(&address).await?;
 
         {
             let mut started = self.is_started.lock().unwrap();
