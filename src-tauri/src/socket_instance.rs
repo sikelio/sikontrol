@@ -77,8 +77,8 @@ impl SocketInstance {
             enigo.key_down(Key::MediaNextTrack);
         });
 
-        s.on("change_main_volume", |_s: SocketRef, Data::<f32>(volume)| {
-            let _ = AudioController::change_main_volume(volume);
-        })
+        s.on("change_main_volume", |_s: SocketRef, Data::<String>(volume)| {
+            let _ = AudioController::change_main_volume(volume.parse::<f32>().unwrap());
+        });
     }
 }

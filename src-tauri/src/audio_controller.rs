@@ -19,7 +19,7 @@ impl AudioController {
         unsafe {
             let mm_device_enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_ALL)?;
             let mm_device_collection: IMMDeviceCollection = mm_device_enumerator.EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE)?;
-            let count = mm_device_collection.GetCount()?;
+            let count: u32 = mm_device_collection.GetCount()?;
             let mut sessions: Vec<String> = Vec::new();
 
             for i in 0..count {
