@@ -6,7 +6,9 @@ use windows::{
     },
     Win32::{
         Media::Audio::{
-            eConsole, eRender, Endpoints::IAudioEndpointVolume, IAudioSessionControl, IAudioSessionControl2, IAudioSessionEnumerator, IAudioSessionManager2, IMMDevice, IMMDeviceEnumerator, ISimpleAudioVolume, MMDeviceEnumerator
+            eConsole, eRender, Endpoints::IAudioEndpointVolume, IAudioSessionControl,
+            IAudioSessionControl2, IAudioSessionEnumerator, IAudioSessionManager2,
+            IMMDevice, IMMDeviceEnumerator, ISimpleAudioVolume, MMDeviceEnumerator
         }, System::Com::{
             CoCreateInstance, CoInitialize, CoUninitialize, CLSCTX_ALL, CLSCTX_INPROC_SERVER
         },
@@ -68,7 +70,7 @@ impl AudioController {
             let _ = CoInitialize(None);
 
             let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER).unwrap();
-            let device = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
+            let device: IMMDevice = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
 
             let endpoint: IAudioEndpointVolume = device.Activate(CLSCTX_INPROC_SERVER, None).unwrap();
             let _ = endpoint.SetMasterVolumeLevelScalar(volume, std::ptr::null());
