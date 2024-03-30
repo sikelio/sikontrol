@@ -6,9 +6,7 @@ use windows::{
     },
     Win32::{
         Media::Audio::{
-            eConsole, eRender, Endpoints::IAudioEndpointVolume, IAudioSessionControl,
-            IAudioSessionControl2, IAudioSessionEnumerator, IAudioSessionManager2,
-            IMMDevice, IMMDeviceEnumerator, MMDeviceEnumerator
+            eConsole, eRender, Endpoints::IAudioEndpointVolume, IAudioSessionControl, IAudioSessionControl2, IAudioSessionEnumerator, IAudioSessionManager2, IMMDevice, IMMDeviceEnumerator, ISimpleAudioVolume, MMDeviceEnumerator
         }, System::Com::{
             CoCreateInstance, CoInitialize, CoUninitialize, CLSCTX_ALL, CLSCTX_INPROC_SERVER
         },
@@ -19,8 +17,8 @@ pub struct AudioController {}
 
 #[derive(Serialize, Deserialize)]
 pub struct Session {
-    pid: u32,
-    name: String
+    pub pid: u32,
+    pub name: String
 }
 
 impl AudioController {
@@ -78,6 +76,33 @@ impl AudioController {
             CoUninitialize();
 
             Ok(())
+        }
+    }
+
+    pub fn change_app_volume(pid: u32, volume: f32) {
+        if volume < 0.0 || volume > 1.0 {
+            return;
+        }
+
+        unsafe {
+            let _ = CoInitialize(None);
+            let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER).unwrap();
+            let device: IMMDevice = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
+            let session_manager: IAudioSessionManager2 = device.Activate(CLSCTX_ALL, None).unwrap();
+            let session_enumerator: IAudioSessionEnumerator = session_manager.GetSessionEnumerator().unwrap();
+
+            let count: i32 = session_enumerator.GetCount().unwrap();
+
+            for i in 0..count {
+                let session_control: IAudioSessionControl = session_enumerator.GetSession(i).unwrap();
+                let session_control_2: IAudioSessionControl2 = session_control.cast().unwrap();
+                let session_pid: u32 = session_control_2.GetProcessId().unwrap();
+
+                if session_pid == pid {
+                    let audio_volume: ISimpleAudioVolume = session_control_2.cast().unwrap();
+                    let _ = audio_volume.SetMasterVolume(volume, std::ptr::null());
+                }
+            }
         }
     }
 }

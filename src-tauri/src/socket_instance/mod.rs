@@ -1,5 +1,7 @@
 use axum::{routing::get, serve, Router};
 use enigo::*;
+use serde::{Serialize, Deserialize};
+use serde_json::Value;
 use socketioxide::{extract::{Data, SocketRef}, layer::SocketIoLayer, SocketIo};
 use std::{future::IntoFuture, sync::Arc};
 use tokio::{net::TcpListener, sync::Notify};
@@ -7,6 +9,12 @@ use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 
 use crate::audio_controller::AudioController;
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct ChangeAppVolumeEvent {
+    pid: u32,
+    volume: f32,
+}
 
 pub struct SocketInstance {
     io: SocketIo,
@@ -80,5 +88,11 @@ impl SocketInstance {
         s.on("change_main_volume", |_s: SocketRef, Data::<String>(volume)| {
             let _ = AudioController::change_main_volume(volume.parse::<f32>().unwrap());
         });
+
+        s.on("change_app_volume", |_s: SocketRef, Data::<Value>(values)| {
+            let data: ChangeAppVolumeEvent = serde_json::from_value(values).unwrap();
+
+            AudioController::change_app_volume(data.pid, data.volume);
+        })
     }
 }
