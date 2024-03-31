@@ -8,6 +8,7 @@ use std::{net::IpAddr, sync::Arc};
 use audio_controller::{AudioController, Session};
 use local_ip_address::local_ip;
 use socket_instance::SocketInstance;
+use tauri::{App, AppHandle, Manager};
 use tauri_plugin_autostart::MacosLauncher;
 
 const CARGO_TOML: &str = include_str!("../Cargo.toml");
@@ -24,15 +25,21 @@ fn get_package_rust() -> String {
 }
 
 #[tauri::command]
-fn get_ip() -> IpAddr {
-    let my_local_ip: IpAddr = local_ip().unwrap();
-
-    my_local_ip
+fn get_ip() -> Option<IpAddr> {
+    match local_ip() {
+        Ok(ip) => Some(ip),
+        Err(_) => None
+    }
 }
 
 #[tauri::command]
 async fn start_server(socket_instance: tauri::State<'_, Arc<SocketInstance>>, port: u16) -> Result<(), String> {
-    socket_instance.start(port).await.map_err(|e| e.to_string())
+    match local_ip() {
+        Ok(_ip) => {
+            socket_instance.start(port).await.map_err(|e| e.to_string())
+        },
+        Err(_) => Err("No IP address".to_string())
+    }
 }
 
 #[tauri::command]
@@ -54,7 +61,14 @@ fn get_sessions() -> Vec<Session> {
 
 fn main() {
     tauri::Builder::default()
-        .manage(Arc::new(SocketInstance::new()))
+        .setup(|app: &mut App| {
+            let app_handle: AppHandle = app.app_handle();
+            let socket_instance: Arc<SocketInstance> = Arc::new(SocketInstance::new(app_handle));
+
+            app.manage(socket_instance);
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             get_package_json, get_package_rust, get_ip, start_server,
             stop_server, is_socket_started, get_sessions

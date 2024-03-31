@@ -1,5 +1,6 @@
 use std::{slice::from_raw_parts, u32};
 use serde::{Serialize, Deserialize};
+use regex::Regex;
 use windows::{
     core::{
         Interface, Result as WindowsResult, PWSTR
@@ -17,10 +18,11 @@ use windows::{
 
 pub struct AudioController {}
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Session {
     pub pid: u32,
-    pub name: String
+    pub name: String,
+    pub volume: f32,
 }
 
 impl AudioController {
@@ -41,10 +43,19 @@ impl AudioController {
                 let session_control_2: IAudioSessionControl2 = session_control.cast().unwrap();
 
                 let pid: u32 = session_control_2.GetProcessId().unwrap();
-                let name: String = AudioController::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap();
+                let name: String;
+
+                if AudioController::contain_audio_srv(&AudioController::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap()) {
+                    name = "System Sounds".to_string();
+                } else {
+                    name = AudioController::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap();
+                }
+
+                let audio_volume: ISimpleAudioVolume = session_control.cast().unwrap();
+                let volume: f32 = audio_volume.GetMasterVolume().unwrap();
 
                 if !name.is_empty() {
-                    sessions.push(Session { pid, name });
+                    sessions.push(Session { pid, name, volume });
                 }
             }
 
@@ -106,5 +117,25 @@ impl AudioController {
 
             CoUninitialize();
         }
+    }
+
+    pub fn get_main_volume_value() -> f32 {
+        unsafe {
+            CoInitialize(None).unwrap();
+
+            let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER).unwrap();
+            let device: IMMDevice = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
+            let endpoint: IAudioEndpointVolume = device.Activate(CLSCTX_INPROC_SERVER, None).unwrap();
+            let volume: f32 = endpoint.GetMasterVolumeLevelScalar().unwrap();
+
+            CoUninitialize();
+
+            volume
+        }
+    }
+
+    fn contain_audio_srv(input: &str) -> bool {
+        let re: Regex = Regex::new(r"\b(?i)AudioSrv\.dll\b").unwrap();
+        re.is_match(input)
     }
 }
