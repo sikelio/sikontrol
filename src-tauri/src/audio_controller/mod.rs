@@ -1,5 +1,6 @@
 use std::{slice::from_raw_parts, u32};
 use serde::{Serialize, Deserialize};
+use regex::Regex;
 use windows::{
     core::{
         Interface, Result as WindowsResult, PWSTR
@@ -42,7 +43,13 @@ impl AudioController {
                 let session_control_2: IAudioSessionControl2 = session_control.cast().unwrap();
 
                 let pid: u32 = session_control_2.GetProcessId().unwrap();
-                let name: String = AudioController::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap();
+                let name: String;
+
+                if AudioController::contain_audio_srv(&AudioController::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap()) {
+                    name = "System Sounds".to_string();
+                } else {
+                    name = AudioController::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap();
+                }
 
                 let audio_volume: ISimpleAudioVolume = session_control.cast().unwrap();
                 let volume: f32 = audio_volume.GetMasterVolume().unwrap();
@@ -125,5 +132,10 @@ impl AudioController {
 
             volume
         }
+    }
+
+    fn contain_audio_srv(input: &str) -> bool {
+        let re: Regex = Regex::new(r"\b(?i)AudioSrv\.dll\b").unwrap();
+        re.is_match(input)
     }
 }
