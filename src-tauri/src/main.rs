@@ -25,15 +25,21 @@ fn get_package_rust() -> String {
 }
 
 #[tauri::command]
-fn get_ip() -> IpAddr {
-    let my_local_ip: IpAddr = local_ip().unwrap();
-
-    my_local_ip
+fn get_ip() -> Option<IpAddr> {
+    match local_ip() {
+        Ok(ip) => Some(ip),
+        Err(_) => None
+    }
 }
 
 #[tauri::command]
 async fn start_server(socket_instance: tauri::State<'_, Arc<SocketInstance>>, port: u16) -> Result<(), String> {
-    socket_instance.start(port).await.map_err(|e| e.to_string())
+    match local_ip() {
+        Ok(_ip) => {
+            socket_instance.start(port).await.map_err(|e| e.to_string())
+        },
+        Err(_) => Err("No IP address".to_string())
+    }
 }
 
 #[tauri::command]

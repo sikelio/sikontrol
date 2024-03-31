@@ -18,12 +18,14 @@ export default class app_controller extends Controller<HTMLDivElement> {
     declare readonly stopbtnTarget: HTMLButtonElement;
     declare readonly servivestatusTarget: HTMLSpanElement;
 
+    private canStart: boolean = false;
     private clientList: string[] = [];
 
     public async connect(): Promise<void> {
-        const ip: string = await invoke('get_ip');
+        const ip: string | null = await invoke('get_ip');
 
-        this.ipTarget.textContent = ip;
+        this.ipTarget.textContent = ip === null ? 'Not connected' : ip;
+        this.canStart = !(ip === null);
         this.fillSocketConfig();
 
         document.addEventListener('settings-saved', async (): Promise<void> => await this.fillSocketConfig());
@@ -58,7 +60,7 @@ export default class app_controller extends Controller<HTMLDivElement> {
         e.preventDefault();
 
         try {
-            const socketConfig = await storeManager.getValue('socketConfig');
+            const socketConfig: ISocketConfig = await storeManager.getValue('socketConfig') as ISocketConfig;
 
             if (socketConfig === undefined || socketConfig === null) {
                 CustomAlert.Toast.fire({
@@ -70,11 +72,21 @@ export default class app_controller extends Controller<HTMLDivElement> {
                 return;
             }
 
+            if (this.canStart === false) {
+                CustomAlert.Toast.fire({
+                    icon: 'error',
+                    title: 'Connection error',
+                    text: 'You don\'t have an IP address'
+                });
+
+                return;
+            }
+
             this.startbtnTarget.disabled = true;
             this.stopbtnTarget.disabled = false;
             this.servivestatusTarget.innerText = 'Started';
 
-            await invoke('start_server', { port: (socketConfig as ISocketConfig).port });
+            await invoke('start_server', { port: socketConfig.port });
 
             return;
         } catch (err: any) {
