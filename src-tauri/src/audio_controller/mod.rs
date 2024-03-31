@@ -20,7 +20,8 @@ pub struct AudioController {}
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Session {
     pub pid: u32,
-    pub name: String
+    pub name: String,
+    pub volume: f32,
 }
 
 impl AudioController {
@@ -43,8 +44,11 @@ impl AudioController {
                 let pid: u32 = session_control_2.GetProcessId().unwrap();
                 let name: String = AudioController::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap();
 
+                let audio_volume: ISimpleAudioVolume = session_control.cast().unwrap();
+                let volume: f32 = audio_volume.GetMasterVolume().unwrap();
+
                 if !name.is_empty() {
-                    sessions.push(Session { pid, name });
+                    sessions.push(Session { pid, name, volume });
                 }
             }
 
@@ -105,6 +109,21 @@ impl AudioController {
             }
 
             CoUninitialize();
+        }
+    }
+
+    pub fn get_main_volume_value() -> f32 {
+        unsafe {
+            CoInitialize(None).unwrap();
+
+            let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER).unwrap();
+            let device: IMMDevice = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
+            let endpoint: IAudioEndpointVolume = device.Activate(CLSCTX_INPROC_SERVER, None).unwrap();
+            let volume: f32 = endpoint.GetMasterVolumeLevelScalar().unwrap();
+
+            CoUninitialize();
+
+            volume
         }
     }
 }
