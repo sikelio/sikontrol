@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod audio_controller;
+mod audio_events;
 mod socket_instance;
 
 use std::{net::IpAddr, sync::Arc};

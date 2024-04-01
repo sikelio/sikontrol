@@ -35,4 +35,4 @@ The project is not yet ready but the basic functions (Play, Pause, Next, Prev) a
 The following functions are yet not implemented but will be in some time.
 
 * IAudioSessionNotification
-* IAudioSessionEvents
+* IAudioSessionEvents (in progress)
