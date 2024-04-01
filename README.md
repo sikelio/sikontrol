@@ -4,9 +4,11 @@
 
 Renewed version of Sikontrol Legacy ([Sikontrol](https://github.com/sikelio/sikontrol-legacy) & [Sikontrol App](https://github.com/sikelio/sikontrol-app-legacy)).
 
+It still desktop app for starting a websocket instance though [socketioxide](https://github.com/Totodore/socketioxide) to control the main and apps. Currently there is no Android or iOS app to connect to the instance, but it will come. I'm waiting on the release of the [V2 of Tauri](https://beta.tauri.app/blog/tauri-2-0-0-beta/) who will support mobile developpment.
+
 This project is now written in [Typescript](https://www.typescriptlang.org/) and [Rust](https://www.rust-lang.org/) through the usage of [Tauri](https://tauri.app/). The mobile app will come later (may be with the usage of [Tauri V2](https://beta.tauri.app/blog/tauri-2-0-0-beta/)). This project still works under Socket IO but with [socketioxide](https://github.com/Totodore/socketioxide) crate.
 
-The legacy version still work but isn't supported anymore.
+The legacy version still work but isn't supported anymore. But I don't think you wanna see an ugly interface (it was my first functionnal project).
 
 ## Why doing a renew ?
 
@@ -34,5 +36,5 @@ The project is not yet ready but the basic functions (Play, Pause, Next, Prev) a
 
 The following functions are yet not implemented but will be in some time.
 
-* IAudioSessionNotification
-* IAudioSessionEvents
+* [IAudioSessionNotification](https://learn.microsoft.com/en-us/windows/win32/api/audiopolicy/nn-audiopolicy-iaudiosessionnotification) implementation : For getting new or deleted sessions
+* [IAudioSessionEvents](https://learn.microsoft.com/fr-fr/windows/win32/api/audiopolicy/nn-audiopolicy-iaudiosessionevents) implementation (in progress) : For getting sessions updates
