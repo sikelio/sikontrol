@@ -23,7 +23,20 @@
         "title": "Sikontrol",
         "width": 1280,
         "height": 800,
-        "resizable": false
+        "resizable": false,
+        "visible": false,
+        "center": true
+      },
+      {
+        "width": 300,
+        "height": 350,
+        "decorations": false,
+        "url": "/splashscreen.html",
+        "label": "splashscreen",
+        "center": true,
+        "transparent": true,
+        "resizable": false,
+        "title": "Sikontrol Launch"
       }
     ],
     "security": {
