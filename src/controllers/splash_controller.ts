@@ -5,6 +5,6 @@ export default class splash_controller extends Controller {
     public connect(): void {
         setTimeout(() => {
             invoke('close_splashscreen');
-        }, 5000);
+        }, 0);
     }
 }
