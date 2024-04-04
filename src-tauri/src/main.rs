@@ -9,7 +9,7 @@ use std::{net::IpAddr, sync::Arc};
 use audio_controller::{AudioController, Session};
 use local_ip_address::local_ip;
 use socket_instance::SocketInstance;
-use tauri::{App, AppHandle, Manager};
+use tauri::{App, AppHandle, Manager, Window};
 use tauri_plugin_autostart::MacosLauncher;
 
 const CARGO_TOML: &str = include_str!("../Cargo.toml");
@@ -60,6 +60,12 @@ fn get_sessions() -> Vec<Session> {
     AudioController::get_audio_sessions()
 }
 
+#[tauri::command]
+async fn close_splashscreen(window: Window) {
+    window.get_window("splashscreen").expect("no window labeled 'splashscreen' found").close().unwrap();
+    window.get_window("main").expect("no window labeled 'main' found").show().unwrap();
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app: &mut App| {
@@ -72,7 +78,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             get_package_json, get_package_rust, get_ip, start_server,
-            stop_server, is_socket_started, get_sessions
+            stop_server, is_socket_started, get_sessions, close_splashscreen
         ])
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![])))
         .plugin(tauri_plugin_store::Builder::default().build())
