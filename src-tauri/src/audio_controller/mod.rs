@@ -1,4 +1,4 @@
-use std::{slice::from_raw_parts, u32};
+use std::slice::from_raw_parts;
 use serde::{Serialize, Deserialize};
 use regex::Regex;
 use windows::{
@@ -84,7 +84,7 @@ impl AudioController {
             let device: IMMDevice = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
 
             let endpoint: IAudioEndpointVolume = device.Activate(CLSCTX_INPROC_SERVER, None).unwrap();
-            let _ = endpoint.SetMasterVolumeLevelScalar(volume, std::ptr::null());
+            endpoint.SetMasterVolumeLevelScalar(volume, std::ptr::null()).ok();
 
             CoUninitialize();
         }
@@ -96,7 +96,8 @@ impl AudioController {
         }
 
         unsafe {
-            let _ = CoInitialize(None);
+            CoInitialize(None).unwrap();
+
             let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER).unwrap();
             let device: IMMDevice = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
             let session_manager: IAudioSessionManager2 = device.Activate(CLSCTX_ALL, None).unwrap();
@@ -111,7 +112,7 @@ impl AudioController {
 
                 if session_pid == pid {
                     let audio_volume: ISimpleAudioVolume = session_control_2.cast().unwrap();
-                    let _ = audio_volume.SetMasterVolume(volume, std::ptr::null());
+                    audio_volume.SetMasterVolume(volume, std::ptr::null()).ok();
                 }
             }
 

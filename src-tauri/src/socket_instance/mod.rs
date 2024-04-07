@@ -2,10 +2,21 @@ use axum::{routing::get, serve, Router};
 use enigo::*;
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
-use socketioxide::{extract::{Data, SocketRef}, layer::SocketIoLayer, SocketIo};
+use socketioxide::{
+    extract::{
+        Data, SocketRef
+    },
+    layer::SocketIoLayer, SocketIo
+};
 use tauri::{AppHandle, Manager};
-use std::{future::IntoFuture, sync::{Arc, Mutex}};
-use tokio::{net::TcpListener, sync::Notify};
+use std::{
+    future::IntoFuture, sync::{
+        Arc, Mutex
+    }
+};
+use tokio::{
+    net::TcpListener, sync::Notify
+};
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 
@@ -28,8 +39,8 @@ pub struct SocketInstance {
 impl SocketInstance {
     pub fn new(app_handle: AppHandle) -> Self {
         let (layer, io) = SocketIo::new_layer();
-        let notify_shutdown = Arc::new(Notify::new());
-        let is_started = Arc::new(Mutex::new(false));
+        let notify_shutdown: Arc<Notify> = Arc::new(Notify::new());
+        let is_started: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
 
         SocketInstance {
             io,
@@ -44,8 +55,8 @@ impl SocketInstance {
         let local_app_handle: Arc<AppHandle> = self.app_handle.clone();
 
         self.io.ns("/", move |s: SocketRef| {
-            let app_handle = local_app_handle.clone();
-            let _ = app_handle.emit_all("new_client", &s.id);
+            let app_handle: Arc<AppHandle> = local_app_handle.clone();
+            app_handle.emit_all("new_client", &s.id).ok();
 
             s.emit("sessions", &serde_json::json!({ "sessions": AudioController::get_audio_sessions() })).ok();
             s.emit("main_volume_value", &serde_json::json!({ "value": AudioController::get_main_volume_value() })).ok();
@@ -76,7 +87,7 @@ impl SocketInstance {
             });
 
             s.on_disconnect(move |s: SocketRef| {
-                let _ = app_handle.emit_all("client_leave", &s.id);
+                app_handle.emit_all("client_leave", &s.id).ok();
             });
         });
 
@@ -84,7 +95,7 @@ impl SocketInstance {
         let local_layer: SocketIoLayer = self.layer.clone();
         let local_notify: Arc<Notify> = self.notify_shutdown.clone();
 
-        let app = Router::new()
+        let app: Router = Router::new()
             .route("/", get(|| async { "Sikontrol" }))
             .with_state(local_io)
             .layer(

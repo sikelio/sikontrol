@@ -5,7 +5,7 @@ mod audio_controller;
 mod audio_events;
 mod socket_instance;
 
-use std::{net::IpAddr, sync::Arc};
+use std::{error::Error, net::IpAddr, sync::Arc};
 use audio_controller::{AudioController, Session};
 use local_ip_address::local_ip;
 use socket_instance::SocketInstance;
@@ -37,7 +37,7 @@ fn get_ip() -> Option<IpAddr> {
 async fn start_server(socket_instance: tauri::State<'_, Arc<SocketInstance>>, port: u16) -> Result<(), String> {
     match local_ip() {
         Ok(_ip) => {
-            socket_instance.start(port).await.map_err(|e| e.to_string())
+            socket_instance.start(port).await.map_err(|e: Box<dyn Error>| e.to_string())
         },
         Err(_) => Err("No IP address".to_string())
     }
