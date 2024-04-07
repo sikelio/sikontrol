@@ -5,8 +5,11 @@ use windows::{
     Win32::{
         Foundation::BOOL,
         Media::Audio::{
-            AudioSessionDisconnectReason, AudioSessionState, AudioSessionStateActive, AudioSessionStateInactive,
-            DisconnectReasonDeviceRemoval, DisconnectReasonServerShutdown, IAudioSessionEvents, IAudioSessionEvents_Impl
+            AudioSessionDisconnectReason, AudioSessionState, AudioSessionStateActive,
+            AudioSessionStateInactive, DisconnectReasonDeviceRemoval,
+            DisconnectReasonExclusiveModeOverride, DisconnectReasonFormatChanged,
+            DisconnectReasonServerShutdown, DisconnectReasonSessionDisconnected,
+            DisconnectReasonSessionLogoff, IAudioSessionEvents, IAudioSessionEvents_Impl
         }
     }
 };
@@ -31,7 +34,6 @@ impl IAudioSessionEvents_Impl for AudioEvents {
     }
 
     fn OnSimpleVolumeChanged(&self, new_volume: f32, new_mute: BOOL, _event_context: *const GUID) -> WindowsResult<()> {
-        // todo!()
         if new_mute.into() {
             println!("MUTE");
         } else {
@@ -51,7 +53,6 @@ impl IAudioSessionEvents_Impl for AudioEvents {
 
     #[allow(non_upper_case_globals)]
     fn OnStateChanged(&self, new_state: AudioSessionState) -> WindowsResult<()> {
-        // todo!()
         let psz_state: &str = match new_state {
             AudioSessionStateActive => "active",
             AudioSessionStateInactive => "inactive",
@@ -65,10 +66,13 @@ impl IAudioSessionEvents_Impl for AudioEvents {
 
     #[allow(non_upper_case_globals)]
     fn OnSessionDisconnected(&self, disconnect_reason: AudioSessionDisconnectReason) -> WindowsResult<()> {
-        // todo!()
         let psz_reason: &str = match disconnect_reason {
-            DisconnectReasonDeviceRemoval => "device removed",
-            DisconnectReasonServerShutdown => "server shut down",
+            DisconnectReasonDeviceRemoval => "User removed the audio endpoint device.",
+            DisconnectReasonServerShutdown => "Windows audio service has stopped.",
+            DisconnectReasonFormatChanged => "Stream format changed for the device that the audio session is connected to.",
+            DisconnectReasonSessionLogoff => "User logged off the Windows Terminal Services (WTS) session that the audio session was running in.",
+            DisconnectReasonSessionDisconnected => "WTS session that the audio session was running in was disconnected.",
+            DisconnectReasonExclusiveModeOverride => "Audio session was disconnected to make the audio endpoint device available for an exclusive-mode connection.",
             _ => "unknown",
         };
 
