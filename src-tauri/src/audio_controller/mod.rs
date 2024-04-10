@@ -16,6 +16,8 @@ use windows::{
     },
 };
 
+use crate::windows_utils::WindowsUtils;
+
 pub struct AudioController {}
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -48,7 +50,7 @@ impl AudioController {
                 if AudioController::contain_audio_srv(&AudioController::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap()) {
                     name = "System Sounds".to_string();
                 } else {
-                    name = AudioController::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap();
+                    name = WindowsUtils::pwstr_to_string(session_control_2.GetDisplayName().unwrap()).unwrap();
                 }
 
                 let audio_volume: ISimpleAudioVolume = session_control.cast().unwrap();
