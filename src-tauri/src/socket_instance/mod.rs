@@ -31,7 +31,12 @@ struct ChangeAppVolumeEvent {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-struct MuteUnmuteEvent {
+struct MuteUnmuteMainEvent {
+    action: String
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct MuteUnmuteSessionEvent {
     pid: u32,
     action: String
 }
@@ -87,6 +92,12 @@ impl SocketInstance {
             s.on("change_main_volume", |_s: SocketRef, Data::<String>(volume)| {
                 AudioController::change_main_volume(volume.parse::<f32>().unwrap());
             });
+
+            s.on("mute_unmute_main_volume", |_s: SocketRef, Data::<Value>(values)| {
+                let data: MuteUnmuteMainEvent = serde_json::from_value(values).unwrap();
+
+                AudioController::mute_unmute_main_volume(data.action);
+            });
     
             s.on("change_app_volume", |_s: SocketRef, Data::<Value>(values)| {
                 let data: ChangeAppVolumeEvent = serde_json::from_value(values).unwrap();
@@ -94,10 +105,10 @@ impl SocketInstance {
                 AudioController::change_app_volume(data.pid, data.volume);
             });
 
-            s.on("mute_unmute_app", |_s: SocketRef, Data::<Value>(values)| {
-                let data: MuteUnmuteEvent = serde_json::from_value(values).unwrap();
+            s.on("mute_unmute_app_volume", |_s: SocketRef, Data::<Value>(values)| {
+                let data: MuteUnmuteSessionEvent = serde_json::from_value(values).unwrap();
 
-                AudioController::mute_unmute_app(data.pid, data.action);
+                AudioController::mute_unmute_app_volume(data.pid, data.action);
             });
 
             s.on_disconnect(move |s: SocketRef| {

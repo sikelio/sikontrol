@@ -65,40 +65,24 @@ impl AudioController {
         }
     }
 
-    pub fn change_main_volume(volume: f32) {
-        if volume < 0.0 || volume > 1.0 {
-            return;
-        }
-
-        unsafe {
-            let _ = CoInitialize(None);
-
-            let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER).unwrap();
-            let device: IMMDevice = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
-
-            let endpoint: IAudioEndpointVolume = device.Activate(CLSCTX_INPROC_SERVER, None).unwrap();
-            endpoint.SetMasterVolumeLevelScalar(volume, std::ptr::null()).ok();
-
-            CoUninitialize();
-        }
-    }
-
-    pub fn get_main_volume_value() -> f32 {
+    fn execute_main_action<T, F>(mut action: F) -> T
+    where F: FnMut(&IAudioEndpointVolume) -> T  {
         unsafe {
             CoInitialize(None).unwrap();
 
             let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_INPROC_SERVER).unwrap();
             let device: IMMDevice = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
             let endpoint: IAudioEndpointVolume = device.Activate(CLSCTX_INPROC_SERVER, None).unwrap();
-            let volume: f32 = endpoint.GetMasterVolumeLevelScalar().unwrap();
+
+            let result: T = action(&endpoint);
 
             CoUninitialize();
 
-            volume
+            result
         }
     }
 
-    pub fn execute_action<F>(pid: u32, mut action: F)
+    fn execute_session_action<F>(pid: u32, mut action: F)
     where F: FnMut(&ISimpleAudioVolume) {
         unsafe {
             CoInitialize(None).unwrap();
@@ -125,19 +109,27 @@ impl AudioController {
         }
     }
 
-    pub fn change_app_volume(pid: u32, volume: f32) {
+    pub fn change_main_volume(volume: f32) {
         if volume < 0.0 || volume > 1.0 {
             return;
         }
 
         unsafe {
-            AudioController::execute_action(pid, |audio_volume| {
-                audio_volume.SetMasterVolume(volume, std::ptr::null()).ok();
+            AudioController::execute_main_action(|endpoint| {
+                endpoint.SetMasterVolumeLevelScalar(volume, std::ptr::null()).ok();
             });
         }
     }
 
-    pub fn mute_unmute_app(pid: u32, action: String) {
+    pub fn get_main_volume_value() -> f32 {
+        unsafe {
+            AudioController::execute_main_action(|endpoint| {
+                endpoint.GetMasterVolumeLevelScalar().unwrap()
+            })
+        }
+    }
+
+    pub fn mute_unmute_main_volume(action: String) {
         if action != "mute" && action != "unmute" {
             return;
         }
@@ -149,7 +141,37 @@ impl AudioController {
         };
 
         unsafe {
-            AudioController::execute_action(pid, move |audio_volume| {
+            AudioController::execute_main_action(|endpoint| {
+                endpoint.SetMute(BOOL(is_mute), std::ptr::null()).ok();
+            });
+        }
+    }
+
+    pub fn change_app_volume(pid: u32, volume: f32) {
+        if volume < 0.0 || volume > 1.0 {
+            return;
+        }
+
+        unsafe {
+            AudioController::execute_session_action(pid, |audio_volume| {
+                audio_volume.SetMasterVolume(volume, std::ptr::null()).ok();
+            });
+        }
+    }
+
+    pub fn mute_unmute_app_volume(pid: u32, action: String) {
+        if action != "mute" && action != "unmute" {
+            return;
+        }
+
+        let is_mute: i32 = match action.as_str() {
+            "unmute" => 0,
+            "mute" => 1,
+            _ => 1
+        };
+
+        unsafe {
+            AudioController::execute_session_action(pid, move |audio_volume| {
                 audio_volume.SetMute(BOOL(is_mute), std::ptr::null()).ok();
             });
         }
