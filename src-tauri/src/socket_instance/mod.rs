@@ -1,6 +1,8 @@
 use axum::{routing::get, serve, Router};
 use enigo::*;
-use serde::{Serialize, Deserialize};
+use serde::{
+    Deserialize, Serialize
+};
 use serde_json::Value;
 use socketioxide::{
     extract::{
@@ -26,6 +28,12 @@ use crate::audio_controller::AudioController;
 struct ChangeAppVolumeEvent {
     pid: u32,
     volume: f32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct MuteUnmuteEvent {
+    pid: u32,
+    action: String
 }
 
 pub struct SocketInstance {
@@ -84,6 +92,12 @@ impl SocketInstance {
                 let data: ChangeAppVolumeEvent = serde_json::from_value(values).unwrap();
     
                 AudioController::change_app_volume(data.pid, data.volume);
+            });
+
+            s.on("mute_unmute_app", |_s: SocketRef, Data::<Value>(values)| {
+                let data: MuteUnmuteEvent = serde_json::from_value(values).unwrap();
+
+                AudioController::mute_unmute_app(data.pid, data.action);
             });
 
             s.on_disconnect(move |s: SocketRef| {
