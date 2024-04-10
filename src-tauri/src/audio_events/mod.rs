@@ -1,6 +1,6 @@
 use windows::{
     core::{
-        implement, Result as WindowsResult, GUID, PCWSTR
+        implement, Result as WindowsResult, GUID, PCWSTR, IntoParam, Param
     },
     Win32::{
         Foundation::BOOL,
@@ -79,5 +79,11 @@ impl IAudioSessionEvents_Impl for AudioEvents {
         println!("Audio session disconnected (reason: {})", psz_reason);
 
         Ok(())
+    }
+}
+
+impl IntoParam<IAudioSessionEvents> for AudioEvents {
+    unsafe fn into_param(self) -> Param<IAudioSessionEvents> {
+        Param::Owned(self.into())
     }
 }
