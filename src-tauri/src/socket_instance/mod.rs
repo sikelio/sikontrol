@@ -147,6 +147,9 @@ impl SocketInstance {
         }
 
         println!("Socket IO instance stopped");
+
+        self.app_handle.emit_all("socket_stopped", "").ok();
+
         Ok(())
     }
 

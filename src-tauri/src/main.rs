@@ -6,11 +6,17 @@ mod audio_events;
 mod socket_instance;
 mod windows_utils;
 
-use std::{error::Error, net::IpAddr, sync::Arc};
-use audio_controller::{AudioController, Session};
+use std::{
+    error::Error, net::IpAddr, sync::Arc
+};
+use audio_controller::{
+    AudioController, Session
+};
 use local_ip_address::local_ip;
 use socket_instance::SocketInstance;
-use tauri::{App, AppHandle, Manager, Window};
+use tauri::{
+    App, AppHandle, Manager, Window
+};
 use tauri_plugin_autostart::MacosLauncher;
 
 const CARGO_TOML: &str = include_str!("../Cargo.toml");
