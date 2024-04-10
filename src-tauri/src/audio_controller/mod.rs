@@ -1,4 +1,6 @@
-use serde::{Serialize, Deserialize};
+use serde::{
+    Serialize, Deserialize
+};
 use regex::Regex;
 use windows::{
     core::Interface,
@@ -27,22 +29,34 @@ pub struct Session {
 }
 
 impl AudioController {
-    pub fn get_audio_sessions() -> Vec<Session> {
+    fn with_audio_session<F>(mut action: F)
+    where F: FnMut(IAudioSessionControl, IAudioSessionControl2) {
         unsafe {
             CoInitialize(None).unwrap();
 
             let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_ALL).unwrap();
             let device: IMMDevice = enumerator.GetDefaultAudioEndpoint(eRender, eConsole).unwrap();
             let session_manager: IAudioSessionManager2 = device.Activate(CLSCTX_ALL, None).unwrap();
-            let session_list: IAudioSessionEnumerator = session_manager.GetSessionEnumerator().unwrap();
+            let session_enumerator: IAudioSessionEnumerator = session_manager.GetSessionEnumerator().unwrap();
 
-            let count: i32 = session_list.GetCount().unwrap();
-            let mut sessions: Vec<Session> = Vec::new();
+            let count: i32 = session_enumerator.GetCount().unwrap();
 
             for i in 0..count {
-                let session_control: IAudioSessionControl = session_list.GetSession(i).unwrap();
+                let session_control: IAudioSessionControl = session_enumerator.GetSession(i).unwrap();
                 let session_control_2: IAudioSessionControl2 = session_control.cast().unwrap();
 
+                action(session_control, session_control_2);
+            }
+
+            CoUninitialize();
+        }
+    }
+
+    pub fn get_audio_sessions() -> Vec<Session> {
+        let mut sessions: Vec<Session> = Vec::new();
+
+        AudioController::with_audio_session(|session_control, session_control_2| {
+            unsafe {
                 let pid: u32 = session_control_2.GetProcessId().unwrap();
                 let name: String;
 
@@ -60,9 +74,9 @@ impl AudioController {
                     sessions.push(Session { pid, name, volume, is_muted });
                 }
             }
+        });
 
-            sessions
-        }
+        sessions
     }
 
     fn execute_main_action<T, F>(mut action: F) -> T
@@ -114,19 +128,19 @@ impl AudioController {
             return;
         }
 
-        unsafe {
-            AudioController::execute_main_action(|endpoint| {
+        AudioController::execute_main_action(|endpoint| {
+            unsafe {
                 endpoint.SetMasterVolumeLevelScalar(volume, std::ptr::null()).ok();
-            });
-        }
+            }
+        });
     }
 
     pub fn get_main_volume_value() -> f32 {
-        unsafe {
-            AudioController::execute_main_action(|endpoint| {
+        AudioController::execute_main_action(|endpoint| {
+            unsafe {
                 endpoint.GetMasterVolumeLevelScalar().unwrap()
-            })
-        }
+            }
+        })
     }
 
     pub fn mute_unmute_main_volume(action: String) {
@@ -140,11 +154,11 @@ impl AudioController {
             _ => 1
         };
 
-        unsafe {
-            AudioController::execute_main_action(|endpoint| {
+        AudioController::execute_main_action(|endpoint| {
+            unsafe {
                 endpoint.SetMute(BOOL(is_mute), std::ptr::null()).ok();
-            });
-        }
+            }
+        });
     }
 
     pub fn change_app_volume(pid: u32, volume: f32) {
@@ -152,11 +166,11 @@ impl AudioController {
             return;
         }
 
-        unsafe {
-            AudioController::execute_session_action(pid, |audio_volume| {
+        AudioController::execute_session_action(pid, |audio_volume| {
+            unsafe {
                 audio_volume.SetMasterVolume(volume, std::ptr::null()).ok();
-            });
-        }
+            }
+        });
     }
 
     pub fn mute_unmute_app_volume(pid: u32, action: String) {
@@ -170,11 +184,11 @@ impl AudioController {
             _ => 1
         };
 
-        unsafe {
-            AudioController::execute_session_action(pid, move |audio_volume| {
+        AudioController::execute_session_action(pid, move |audio_volume| {
+            unsafe {
                 audio_volume.SetMute(BOOL(is_mute), std::ptr::null()).ok();
-            });
-        }
+            }
+        });
     }
 
     fn contain_audio_srv(input: &str) -> bool {
