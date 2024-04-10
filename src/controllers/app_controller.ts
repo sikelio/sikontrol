@@ -32,6 +32,7 @@ export default class app_controller extends Controller<HTMLDivElement> {
 
         listen('new_client', (e: TauriEvent<string>) => this.newClient(e));        
         listen('client_leave', (e: TauriEvent<string>) => this.clientLeave(e));
+        listen('socket_stopped', (e: TauriEvent<unknown>) => this.socketClosed());
     }
 
     private async fillSocketConfig(): Promise<void> {
@@ -141,5 +142,9 @@ export default class app_controller extends Controller<HTMLDivElement> {
         
         const clientIndex: number = this.clientList.indexOf(event.payload);
         this.clientList.splice(clientIndex, 1);
+    }
+
+    private socketClosed(): void {
+        this.devicesTarget.innerHTML = '';
     }
 }

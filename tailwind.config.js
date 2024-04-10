@@ -2,7 +2,7 @@
 export default {
   content: [
     './index.html',
-    './public/splashscreen.html',
+    './public/views/*.html',
     './src/**/*.{js,ts}',
   ],
   theme: {
@@ -18,7 +18,7 @@ export default {
         sidebar: '0 10px 20px -3px rgba(255, 255, 255, 0.2), 0 4px 6px -2px rgba(255, 255, 255, 0.1)',
       },
       backgroundImage: {
-        logo: "url('/logo.png')"
+        logo: "url('/assets/logo.png')"
       }
     },
   },

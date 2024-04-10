@@ -30,7 +30,11 @@ export default class credits_controller extends Controller<HTMLDivElement> {
     }
 
     private insertNpmLibs(pkg: IPackageJson): void {
-        Object.keys(pkg.dependencies).forEach((dependency: string) => {
+        const sortObjectKeys = (obj: { [key: string]: string }) => {
+            return Object.keys(obj).sort((a, b) => a.localeCompare(b));
+        };
+
+        sortObjectKeys(pkg.dependencies).forEach((dependency: string) => {
             const libLink: HTMLAnchorElement = document.createElement('a');
             libLink.href = `${this.npmBaseLink}${dependency}`;
             libLink.target = '_blank';
@@ -43,27 +47,34 @@ export default class credits_controller extends Controller<HTMLDivElement> {
             this.npmlibsTarget.appendChild(libItem);
         });
 
-        Object.keys(pkg.devDependencies).forEach((devDependency: string) => {
+        sortObjectKeys(pkg.devDependencies).forEach((devDependency: string) => {
             const libLink: HTMLAnchorElement = document.createElement('a');
             libLink.href = `${this.npmBaseLink}${devDependency}`;
             libLink.target = '_blank';
             libLink.classList.add('hover:text-gray-500', 'hover:underline');
-            libLink.textContent = `- ${devDependency} - ${this.formatNpmPackageVersion(pkg.devDependencies[devDependency])}`;;
+            libLink.textContent = `- ${devDependency} - ${this.formatNpmPackageVersion(pkg.devDependencies[devDependency])}`;
 
             const libItem: HTMLLIElement = document.createElement('li');
             libItem.appendChild(libLink);
-
+    
             this.npmdevlibsTarget.appendChild(libItem);
         });
     }
 
     private insertCargoLibs(pkg: IToml): void {
-        Object.keys(pkg.dependencies).forEach((dependency: string) => {
+        const sortObjectKeys = (obj: { [key: string]: any }) => {
+            return Object.keys(obj).sort((a, b) => a.localeCompare(b));
+        };
+
+        sortObjectKeys(pkg.dependencies).forEach((dependency: string) => {
             const libLink: HTMLAnchorElement = document.createElement('a');
             libLink.href = `${this.crateBaseLink}${dependency}`;
             libLink.target = '_blank';
             libLink.classList.add('hover:text-gray-500', 'hover:underline');
-            libLink.textContent = `- ${dependency} - ${this.getCargoLibVersion(pkg.dependencies[dependency])}`;
+
+            const dependencyDetail = pkg.dependencies[dependency];
+            const versionText = typeof dependencyDetail === 'string' ? dependencyDetail : dependencyDetail.version;
+            libLink.textContent = `- ${dependency} - ${this.getCargoLibVersion(versionText)}`;
 
             const libItem: HTMLLIElement = document.createElement('li');
             libItem.appendChild(libLink);
@@ -97,10 +108,12 @@ export default class credits_controller extends Controller<HTMLDivElement> {
     private getCargoLibVersion(dependency: string | ITomlDependencyCrates | ITomlDependencyGitHub): string {
         if (typeof dependency === 'string') {
             return `v${dependency}`;
-        } else if ('version' in dependency && 'features' in dependency) {
-            return `v${dependency.version}`;
-        } else if ('git' in dependency && 'branch' in dependency) {
-            return dependency.branch;
+        } else if (dependency && typeof dependency === 'object') {
+            if ('version' in dependency && 'features' in dependency) {
+                return `v${dependency.version}`;
+            } else if ('git' in dependency && 'branch' in dependency) {
+                return dependency.branch;
+            }
         }
 
         return 'undefined';

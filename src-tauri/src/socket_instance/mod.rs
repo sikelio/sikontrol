@@ -1,11 +1,24 @@
 use axum::{routing::get, serve, Router};
 use enigo::*;
-use serde::{Serialize, Deserialize};
+use serde::{
+    Deserialize, Serialize
+};
 use serde_json::Value;
-use socketioxide::{extract::{Data, SocketRef}, layer::SocketIoLayer, SocketIo};
+use socketioxide::{
+    extract::{
+        Data, SocketRef
+    },
+    layer::SocketIoLayer, SocketIo
+};
 use tauri::{AppHandle, Manager};
-use std::{future::IntoFuture, sync::{Arc, Mutex}};
-use tokio::{net::TcpListener, sync::Notify};
+use std::{
+    future::IntoFuture, sync::{
+        Arc, Mutex
+    }
+};
+use tokio::{
+    net::TcpListener, sync::Notify
+};
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 
@@ -15,6 +28,17 @@ use crate::audio_controller::AudioController;
 struct ChangeAppVolumeEvent {
     pid: u32,
     volume: f32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct MuteUnmuteMainEvent {
+    action: String
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct MuteUnmuteSessionEvent {
+    pid: u32,
+    action: String
 }
 
 pub struct SocketInstance {
@@ -28,8 +52,8 @@ pub struct SocketInstance {
 impl SocketInstance {
     pub fn new(app_handle: AppHandle) -> Self {
         let (layer, io) = SocketIo::new_layer();
-        let notify_shutdown = Arc::new(Notify::new());
-        let is_started = Arc::new(Mutex::new(false));
+        let notify_shutdown: Arc<Notify> = Arc::new(Notify::new());
+        let is_started: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
 
         SocketInstance {
             io,
@@ -44,8 +68,8 @@ impl SocketInstance {
         let local_app_handle: Arc<AppHandle> = self.app_handle.clone();
 
         self.io.ns("/", move |s: SocketRef| {
-            let app_handle = local_app_handle.clone();
-            let _ = app_handle.emit_all("new_client", &s.id);
+            let app_handle: Arc<AppHandle> = local_app_handle.clone();
+            app_handle.emit_all("new_client", &s.id).ok();
 
             s.emit("sessions", &serde_json::json!({ "sessions": AudioController::get_audio_sessions() })).ok();
             s.emit("main_volume_value", &serde_json::json!({ "value": AudioController::get_main_volume_value() })).ok();
@@ -68,6 +92,12 @@ impl SocketInstance {
             s.on("change_main_volume", |_s: SocketRef, Data::<String>(volume)| {
                 AudioController::change_main_volume(volume.parse::<f32>().unwrap());
             });
+
+            s.on("mute_unmute_main_volume", |_s: SocketRef, Data::<Value>(values)| {
+                let data: MuteUnmuteMainEvent = serde_json::from_value(values).unwrap();
+
+                AudioController::mute_unmute_main_volume(data.action);
+            });
     
             s.on("change_app_volume", |_s: SocketRef, Data::<Value>(values)| {
                 let data: ChangeAppVolumeEvent = serde_json::from_value(values).unwrap();
@@ -75,8 +105,14 @@ impl SocketInstance {
                 AudioController::change_app_volume(data.pid, data.volume);
             });
 
+            s.on("mute_unmute_app_volume", |_s: SocketRef, Data::<Value>(values)| {
+                let data: MuteUnmuteSessionEvent = serde_json::from_value(values).unwrap();
+
+                AudioController::mute_unmute_app_volume(data.pid, data.action);
+            });
+
             s.on_disconnect(move |s: SocketRef| {
-                let _ = app_handle.emit_all("client_leave", &s.id);
+                app_handle.emit_all("client_leave", &s.id).ok();
             });
         });
 
@@ -84,7 +120,7 @@ impl SocketInstance {
         let local_layer: SocketIoLayer = self.layer.clone();
         let local_notify: Arc<Notify> = self.notify_shutdown.clone();
 
-        let app = Router::new()
+        let app: Router = Router::new()
             .route("/", get(|| async { "Sikontrol" }))
             .with_state(local_io)
             .layer(
@@ -111,6 +147,9 @@ impl SocketInstance {
         }
 
         println!("Socket IO instance stopped");
+
+        self.app_handle.emit_all("socket_stopped", "").ok();
+
         Ok(())
     }
 
