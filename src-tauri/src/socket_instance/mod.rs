@@ -1,4 +1,4 @@
-use axum::{routing::get, serve, Router};
+use axum::{response::Redirect, routing::get, serve, Router};
 use enigo::*;
 use serde::{
     Deserialize, Serialize
@@ -72,7 +72,7 @@ impl SocketInstance {
         let local_notify: Arc<Notify> = self.notify_shutdown.clone();
 
         let app: Router = Router::new()
-            .route("/", get(|| async { "Sikontrol" }))
+            .route("/", get(|| async { Redirect::permanent("https://github.com/sikelio/sikontrol") }))
             .with_state(local_io)
             .layer(
                 ServiceBuilder::new()
