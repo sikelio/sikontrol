@@ -65,56 +65,7 @@ impl SocketInstance {
     }
 
     pub async fn start(&self, port: u16) -> Result<(), Box<dyn std::error::Error>> {
-        let local_app_handle: Arc<AppHandle> = self.app_handle.clone();
-
-        self.io.ns("/", move |s: SocketRef| {
-            let app_handle: Arc<AppHandle> = local_app_handle.clone();
-            app_handle.emit_all("new_client", &s.id).ok();
-
-            s.emit("sessions", &serde_json::json!({ "sessions": AudioController::get_audio_sessions() })).ok();
-            s.emit("main_volume_value", &serde_json::json!({ "value": AudioController::get_main_volume_value() })).ok();
-
-            s.on("play_pause", || {
-                let mut enigo: Enigo = Enigo::new();
-                enigo.key_down(Key::MediaPlayPause);
-            });
-    
-            s.on("prev_track", || {
-                let mut enigo: Enigo = Enigo::new();
-                enigo.key_down(Key::MediaPrevTrack);
-            });
-    
-            s.on("next_track", || {
-                let mut enigo: Enigo = Enigo::new();
-                enigo.key_down(Key::MediaNextTrack);
-            });
-    
-            s.on("change_main_volume", |_s: SocketRef, Data::<String>(volume)| {
-                AudioController::change_main_volume(volume.parse::<f32>().unwrap());
-            });
-
-            s.on("mute_unmute_main_volume", |_s: SocketRef, Data::<Value>(values)| {
-                let data: MuteUnmuteMainEvent = serde_json::from_value(values).unwrap();
-
-                AudioController::mute_unmute_main_volume(data.action);
-            });
-    
-            s.on("change_app_volume", |_s: SocketRef, Data::<Value>(values)| {
-                let data: ChangeAppVolumeEvent = serde_json::from_value(values).unwrap();
-    
-                AudioController::change_app_volume(data.pid, data.volume);
-            });
-
-            s.on("mute_unmute_app_volume", |_s: SocketRef, Data::<Value>(values)| {
-                let data: MuteUnmuteSessionEvent = serde_json::from_value(values).unwrap();
-
-                AudioController::mute_unmute_app_volume(data.pid, data.action);
-            });
-
-            s.on_disconnect(move |s: SocketRef| {
-                app_handle.emit_all("client_leave", &s.id).ok();
-            });
-        });
+        SocketInstance::setup_socket(&self);
 
         let local_io: SocketIo = self.io.clone();
         let local_layer: SocketIoLayer = self.layer.clone();
@@ -160,5 +111,57 @@ impl SocketInstance {
         }
 
         self.notify_shutdown.notify_one();
+    }
+
+    fn setup_socket(&self) {
+        let local_app_handle: Arc<AppHandle> = self.app_handle.clone();
+
+        self.io.ns("/", move |s: SocketRef| {
+            local_app_handle.emit_all("new_client", &s.id).ok();
+
+            s.emit("sessions", &serde_json::json!({ "sessions": AudioController::get_audio_sessions() })).ok();
+            s.emit("main_volume_value", &serde_json::json!({ "value": AudioController::get_main_volume_value() })).ok();
+
+            s.on("play_pause", || {
+                let mut enigo: Enigo = Enigo::new();
+                enigo.key_down(Key::MediaPlayPause);
+            });
+    
+            s.on("prev_track", || {
+                let mut enigo: Enigo = Enigo::new();
+                enigo.key_down(Key::MediaPrevTrack);
+            });
+    
+            s.on("next_track", || {
+                let mut enigo: Enigo = Enigo::new();
+                enigo.key_down(Key::MediaNextTrack);
+            });
+            
+            s.on("change_main_volume", |_s: SocketRef, Data::<String>(volume)| {
+                AudioController::change_main_volume(volume.parse::<f32>().unwrap());
+            });
+
+            s.on("mute_unmute_main_volume", |_s: SocketRef, Data::<Value>(values)| {
+                let data: MuteUnmuteMainEvent = serde_json::from_value(values).unwrap();
+
+                AudioController::mute_unmute_main_volume(data.action);
+            });
+    
+            s.on("change_app_volume", |_s: SocketRef, Data::<Value>(values)| {
+                let data: ChangeAppVolumeEvent = serde_json::from_value(values).unwrap();
+    
+                AudioController::change_app_volume(data.pid, data.volume);
+            });
+
+            s.on("mute_unmute_app_volume", |_s: SocketRef, Data::<Value>(values)| {
+                let data: MuteUnmuteSessionEvent = serde_json::from_value(values).unwrap();
+
+                AudioController::mute_unmute_app_volume(data.pid, data.action);
+            });
+
+            s.on_disconnect(move |s: SocketRef| {
+                local_app_handle.emit_all("client_leave", &s.id).ok();
+            });
+        });
     }
 }
