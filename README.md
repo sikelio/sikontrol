@@ -32,9 +32,12 @@ The project is not yet ready but the basic functions (Play, Pause, Next, Prev) a
 * Next Track : `next_track`
 * Prev Track : `prev_track`
 * Change Main Volume : `change_main_volume`
-* Change Apps Volmue : `change_app_volume`
+* Change Apps Volume : `change_app_volume`
+* Mute Unmute Main Volume : `mute_unmute_main_volume`
+* Mute Unmute Apps Volume : `mute_unmute_app_volume`
 
 The following functions are yet not implemented but will be in some time.
 
 * [IAudioSessionNotification](https://learn.microsoft.com/en-us/windows/win32/api/audiopolicy/nn-audiopolicy-iaudiosessionnotification) implementation : For getting new or deleted sessions
 * [IAudioSessionEvents](https://learn.microsoft.com/fr-fr/windows/win32/api/audiopolicy/nn-audiopolicy-iaudiosessionevents) implementation (in progress) : For getting sessions updates
+* mDNS implementation for findind easely the instance for a client device.
